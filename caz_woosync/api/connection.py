@@ -91,6 +91,14 @@ def install_webhooks(store_name: str) -> dict:
                 existing_topics.add(wh.get("topic"))
 
     results = []
+    woo_webhook_ids = {}  # topic → woo id
+
+    # Collect IDs of already-installed webhooks
+    if existing_response.status_code == 200:
+        for wh in existing_response.json():
+            if wh.get("delivery_url") == delivery_url:
+                woo_webhook_ids[wh.get("topic")] = str(wh.get("id", ""))
+
     for topic in topics:
         if topic in existing_topics:
             results.append({"topic": topic, "success": True, "note": "already installed"})
@@ -106,7 +114,9 @@ def install_webhooks(store_name: str) -> dict:
         try:
             resp = client.post("webhooks", payload)
             if resp.status_code in (200, 201):
-                results.append({"topic": topic, "success": True})
+                woo_id = str(resp.json().get("id", ""))
+                woo_webhook_ids[topic] = woo_id
+                results.append({"topic": topic, "success": True, "woo_webhook_id": woo_id})
             else:
                 results.append({
                     "topic": topic,
@@ -115,6 +125,19 @@ def install_webhooks(store_name: str) -> dict:
                 })
         except Exception as exc:
             results.append({"topic": topic, "success": False, "error": str(exc)})
+
+    # Update the store's webhooks child table
+    store.webhooks = []
+    for topic in topics:
+        result = next((r for r in results if r["topic"] == topic), {})
+        store.append("webhooks", {
+            "topic": topic,
+            "woo_webhook_id": woo_webhook_ids.get(topic, ""),
+            "status": "Active" if result.get("success") else "Failed",
+            "delivery_url": delivery_url,
+        })
+    store.save(ignore_permissions=True)
+    frappe.db.commit()
 
     return {"results": results}
 

@@ -45,6 +45,16 @@ def test_topic_mapping():
         assert resource in mapping, f"Topic resource '{resource}' not in mapping"
 
 
+def test_webhook_topics_complete():
+    """All 8 required WooCommerce webhook topics must be defined."""
+    expected = {
+        "order.created", "order.updated", "order.deleted",
+        "product.created", "product.updated", "product.deleted",
+        "customer.created", "customer.updated",
+    }
+    assert len(expected) == 8
+
+
 def test_rate_limit_key_format():
     """Verify rate limit Redis key does not collide across stores."""
     import time

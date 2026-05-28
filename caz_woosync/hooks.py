@@ -24,4 +24,9 @@ scheduler_events = {
     ],
 }
 
+doctype_js = {
+    "Caz Woo Store": "doctype/caz_woo_store/caz_woo_store.js",
+    "Caz Woo Sync Queue": "doctype/caz_woo_sync_queue/caz_woo_sync_queue.js",
+}
+
 doc_events = {}

@@ -33,6 +33,7 @@
     "sync_direction",
     "api_rate_limit",
     "section_webhook",
+    "webhooks",
     "webhook_url"
   ],
   "fields": [
@@ -214,6 +215,13 @@
       "fieldname": "section_webhook",
       "fieldtype": "Section Break",
       "label": "Webhook Information"
+    },
+    {
+      "fieldname": "webhooks",
+      "fieldtype": "Table",
+      "label": "Installed Webhooks",
+      "options": "Caz Woo Webhook",
+      "description": "Webhooks registered in WooCommerce for this store. Populated automatically when you click Install Webhooks."
     },
     {
       "fieldname": "webhook_url",
