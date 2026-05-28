@@ -117,13 +117,19 @@ def _route(doc):
             payload = json.loads(doc.payload) if doc.payload and doc.payload != "{}" else None
             sync_customer_to_erp(doc.store, doc.woo_id, payload)
         elif doc.entity_type == "Inventory":
-            doc.mark_skipped("Inventory sync not yet implemented (Phase 6)")
+            from caz_woosync.sync.inventory import sync_stock_from_woo
+            import json
+            payload = json.loads(doc.payload) if doc.payload and doc.payload != "{}" else None
+            sync_stock_from_woo(doc.store, doc.woo_id, payload)
         else:
             doc.mark_skipped(f"Unknown entity type: {doc.entity_type}")
     elif doc.direction == "erp_to_woo":
         if doc.entity_type == "Product":
             from caz_woosync.sync.items import sync_item_to_woo
             sync_item_to_woo(doc.store, doc.erp_docname)
+        elif doc.entity_type == "Inventory":
+            from caz_woosync.sync.inventory import sync_stock_to_woo
+            sync_stock_to_woo(doc.store, doc.erp_docname)
         else:
             doc.mark_skipped(f"erp_to_woo not implemented for {doc.entity_type}")
     else:

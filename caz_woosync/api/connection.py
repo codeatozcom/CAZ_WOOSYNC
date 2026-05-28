@@ -292,6 +292,18 @@ def trigger_customer_sync(store_name: str, woo_customer_id: str) -> dict:
 
 
 @frappe.whitelist()
+def push_all_stock(store_name: str) -> dict:
+    """Trigger bulk stock push for all mapped items in this store."""
+    frappe.enqueue(
+        "caz_woosync.sync.inventory.push_all_stock",
+        queue="long",
+        timeout=3600,
+        store_name=store_name,
+    )
+    return {"queued": True}
+
+
+@frappe.whitelist()
 def get_item_sync_status(store_name: str, woo_product_id: str) -> dict:
     """Return the sync status for a WooCommerce product from the item mapping table."""
     mapping = frappe.db.get_value(

@@ -35,5 +35,8 @@ doctype_js = {
 doc_events = {
     "Item": {
         "on_update": "caz_woosync.sync.items.on_item_update",
-    }
+    },
+    "Stock Ledger Entry": {
+        "on_submit": "caz_woosync.sync.inventory.on_stock_ledger_submit",
+    },
 }

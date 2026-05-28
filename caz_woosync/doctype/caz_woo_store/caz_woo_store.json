@@ -46,6 +46,10 @@
     "sync_customers_from_woo",
     "update_customers_from_woo",
     "default_territory",
+    "section_inventory_sync",
+    "sync_stock_to_woo",
+    "sync_stock_from_woo",
+    "stock_sync_threshold",
     "section_webhook",
     "webhooks",
     "webhook_url"
@@ -318,6 +322,32 @@
       "label": "Default Territory",
       "options": "Territory",
       "description": "Default territory for WooCommerce customers. Defaults to 'All Territories' if not set."
+    },
+    {
+      "fieldname": "section_inventory_sync",
+      "fieldtype": "Section Break",
+      "label": "Inventory Sync Settings"
+    },
+    {
+      "fieldname": "sync_stock_to_woo",
+      "fieldtype": "Check",
+      "label": "Sync Stock to WooCommerce",
+      "default": "1",
+      "description": "Push stock level changes from ERPNext to WooCommerce when a Stock Ledger Entry is submitted."
+    },
+    {
+      "fieldname": "sync_stock_from_woo",
+      "fieldtype": "Check",
+      "label": "Sync Stock from WooCommerce",
+      "default": "0",
+      "description": "Create Stock Reconciliation in ERPNext when WooCommerce stock changes. Use with caution — may conflict if both systems manage stock."
+    },
+    {
+      "fieldname": "stock_sync_threshold",
+      "fieldtype": "Int",
+      "label": "Stock Sync Threshold",
+      "default": "0",
+      "description": "Only push stock updates when quantity differs by more than this amount. Set to 0 to always sync. Useful for high-volume stores."
     },
     {
       "fieldname": "section_webhook",
