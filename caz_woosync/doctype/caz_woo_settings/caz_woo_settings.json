@@ -1,0 +1,112 @@
+{
+  "actions": [],
+  "creation": "2026-05-28 00:00:00.000000",
+  "doctype": "DocType",
+  "engine": "InnoDB",
+  "field_order": [
+    "section_rate",
+    "max_requests_per_minute",
+    "queue_batch_size",
+    "column_break_r",
+    "retry_attempts",
+    "section_security",
+    "verify_webhook_signature",
+    "allowed_webhook_ips",
+    "section_logging",
+    "enable_debug_logging",
+    "alert_email",
+    "log_retention_days"
+  ],
+  "fields": [
+    {
+      "fieldname": "section_rate",
+      "fieldtype": "Section Break",
+      "label": "Rate Limiting"
+    },
+    {
+      "fieldname": "max_requests_per_minute",
+      "fieldtype": "Int",
+      "label": "Max Requests per Minute",
+      "default": "60",
+      "description": "Maximum WooCommerce API requests per minute across all stores."
+    },
+    {
+      "fieldname": "queue_batch_size",
+      "fieldtype": "Int",
+      "label": "Queue Batch Size",
+      "default": "50",
+      "description": "How many sync queue items to process per scheduled run. Lower this if your server is slow."
+    },
+    {
+      "fieldname": "column_break_r",
+      "fieldtype": "Column Break"
+    },
+    {
+      "fieldname": "retry_attempts",
+      "fieldtype": "Int",
+      "label": "Retry Attempts",
+      "default": "5",
+      "description": "How many times to retry a failed sync before marking it permanently failed and sending an alert."
+    },
+    {
+      "fieldname": "section_security",
+      "fieldtype": "Section Break",
+      "label": "Security"
+    },
+    {
+      "fieldname": "verify_webhook_signature",
+      "fieldtype": "Check",
+      "label": "Verify Webhook Signature",
+      "default": "1",
+      "description": "Reject incoming WooCommerce webhooks that fail HMAC-SHA256 signature verification. Strongly recommended."
+    },
+    {
+      "fieldname": "allowed_webhook_ips",
+      "fieldtype": "Small Text",
+      "label": "Allowed Webhook IPs",
+      "description": "Optional: restrict webhooks to these IP addresses or CIDR ranges (one per line). Leave blank to allow all IPs."
+    },
+    {
+      "fieldname": "section_logging",
+      "fieldtype": "Section Break",
+      "label": "Logging & Alerts"
+    },
+    {
+      "fieldname": "enable_debug_logging",
+      "fieldtype": "Check",
+      "label": "Enable Debug Logging",
+      "default": "0",
+      "description": "Log detailed sync activity. Useful for troubleshooting. Disable in production to save disk space."
+    },
+    {
+      "fieldname": "alert_email",
+      "fieldtype": "Data",
+      "label": "Alert Email",
+      "description": "Email address to notify when sync failures occur or connection goes down. Leave blank to disable alerts."
+    },
+    {
+      "fieldname": "log_retention_days",
+      "fieldtype": "Int",
+      "label": "Log Retention (Days)",
+      "default": "30",
+      "description": "Delete sync queue records older than this many days. Keeps your database from growing too large."
+    }
+  ],
+  "issingle": 1,
+  "links": [],
+  "modified": "2026-05-28 00:00:00.000000",
+  "modified_by": "Administrator",
+  "module": "Caz Woosync",
+  "name": "Caz Woo Settings",
+  "owner": "Administrator",
+  "permissions": [
+    {
+      "read": 1,
+      "role": "System Manager",
+      "write": 1
+    }
+  ],
+  "sort_field": "modified",
+  "sort_order": "DESC",
+  "track_changes": 1
+}

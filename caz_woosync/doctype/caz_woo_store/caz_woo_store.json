@@ -1,0 +1,264 @@
+{
+  "actions": [],
+  "allow_rename": 1,
+  "autoname": "field:store_name",
+  "creation": "2026-05-28 00:00:00.000000",
+  "doctype": "DocType",
+  "engine": "InnoDB",
+  "field_order": [
+    "store_name",
+    "woo_url",
+    "column_break_1",
+    "is_active",
+    "connection_status",
+    "last_connection_check",
+    "section_credentials",
+    "consumer_key",
+    "consumer_secret",
+    "webhook_secret",
+    "woo_api_version",
+    "section_erpnext",
+    "company",
+    "warehouse",
+    "column_break_2",
+    "income_account",
+    "tax_account",
+    "section_defaults",
+    "item_group",
+    "customer_group",
+    "column_break_3",
+    "default_uom",
+    "so_naming_series",
+    "section_sync",
+    "sync_direction",
+    "api_rate_limit",
+    "section_webhook",
+    "webhook_url"
+  ],
+  "fields": [
+    {
+      "fieldname": "store_name",
+      "fieldtype": "Data",
+      "label": "Store Name",
+      "reqd": 1,
+      "unique": 1,
+      "in_list_view": 1,
+      "description": "A friendly label for this store, e.g. 'Main Store'. Used in sync logs and reports."
+    },
+    {
+      "fieldname": "woo_url",
+      "fieldtype": "Data",
+      "label": "WooCommerce URL",
+      "reqd": 1,
+      "description": "Full WooCommerce store URL including https://, e.g. https://mystore.com. Do not include /wp-admin."
+    },
+    {
+      "fieldname": "column_break_1",
+      "fieldtype": "Column Break"
+    },
+    {
+      "fieldname": "is_active",
+      "fieldtype": "Check",
+      "label": "Is Active",
+      "default": "1",
+      "description": "Uncheck to pause all sync for this store without deleting its configuration."
+    },
+    {
+      "fieldname": "connection_status",
+      "fieldtype": "Select",
+      "label": "Connection Status",
+      "options": "\nConnected\nFailed\nUntested",
+      "default": "Untested",
+      "read_only": 1,
+      "in_list_view": 1,
+      "description": "Last known connection status. Updated automatically when you test the connection."
+    },
+    {
+      "fieldname": "last_connection_check",
+      "fieldtype": "Datetime",
+      "label": "Last Connection Check",
+      "read_only": 1,
+      "description": "When ERPNext last successfully communicated with this WooCommerce store."
+    },
+    {
+      "fieldname": "section_credentials",
+      "fieldtype": "Section Break",
+      "label": "API Credentials"
+    },
+    {
+      "fieldname": "consumer_key",
+      "fieldtype": "Data",
+      "label": "Consumer Key",
+      "reqd": 1,
+      "description": "WooCommerce REST API Consumer Key. Generate in WooCommerce > Settings > Advanced > REST API. Set permission to Read/Write."
+    },
+    {
+      "fieldname": "consumer_secret",
+      "fieldtype": "Password",
+      "label": "Consumer Secret",
+      "reqd": 1,
+      "description": "WooCommerce REST API Consumer Secret. Generated alongside Consumer Key. Stored encrypted in ERPNext."
+    },
+    {
+      "fieldname": "webhook_secret",
+      "fieldtype": "Password",
+      "label": "Webhook Secret",
+      "description": "Secret used to verify incoming WooCommerce webhook signatures (HMAC-SHA256). Generate a strong random string and paste it here and in your WooCommerce webhook settings."
+    },
+    {
+      "fieldname": "woo_api_version",
+      "fieldtype": "Data",
+      "label": "WooCommerce API Version",
+      "default": "wc/v3",
+      "reqd": 1,
+      "description": "WooCommerce REST API version. Leave as wc/v3 unless instructed otherwise by support."
+    },
+    {
+      "fieldname": "section_erpnext",
+      "fieldtype": "Section Break",
+      "label": "ERPNext Defaults"
+    },
+    {
+      "fieldname": "company",
+      "fieldtype": "Link",
+      "label": "Company",
+      "options": "Company",
+      "reqd": 1,
+      "description": "WooCommerce orders are created under this company in ERPNext. Required."
+    },
+    {
+      "fieldname": "warehouse",
+      "fieldtype": "Link",
+      "label": "Warehouse",
+      "options": "Warehouse",
+      "reqd": 1,
+      "description": "Stock levels pushed to WooCommerce come from this warehouse. Delivery orders for WooCommerce sales also use this warehouse."
+    },
+    {
+      "fieldname": "column_break_2",
+      "fieldtype": "Column Break"
+    },
+    {
+      "fieldname": "income_account",
+      "fieldtype": "Link",
+      "label": "Income Account",
+      "options": "Account",
+      "description": "Which account records WooCommerce sales revenue. Usually your main Sales account in your chart of accounts."
+    },
+    {
+      "fieldname": "tax_account",
+      "fieldtype": "Link",
+      "label": "Tax Account",
+      "options": "Account",
+      "description": "Which account records taxes collected from WooCommerce. Usually 'Sales Tax Payable' or 'Output VAT'."
+    },
+    {
+      "fieldname": "section_defaults",
+      "fieldtype": "Section Break",
+      "label": "Import Defaults"
+    },
+    {
+      "fieldname": "item_group",
+      "fieldtype": "Link",
+      "label": "Item Group",
+      "options": "Item Group",
+      "description": "New products imported from WooCommerce are placed in this item group. You can move them to other groups later."
+    },
+    {
+      "fieldname": "customer_group",
+      "fieldtype": "Link",
+      "label": "Customer Group",
+      "options": "Customer Group",
+      "description": "WooCommerce customers are assigned to this customer group in ERPNext. Useful for segmenting ecommerce vs direct sales."
+    },
+    {
+      "fieldname": "column_break_3",
+      "fieldtype": "Column Break"
+    },
+    {
+      "fieldname": "default_uom",
+      "fieldtype": "Link",
+      "label": "Default UOM",
+      "options": "UOM",
+      "default": "Nos",
+      "description": "Unit of measure for imported products. Usually 'Nos' (Numbers). Individual items can use different UOMs later."
+    },
+    {
+      "fieldname": "so_naming_series",
+      "fieldtype": "Data",
+      "label": "SO Naming Series",
+      "default": "SO-CAZWOO-.YYYY.-",
+      "description": "Naming series for Sales Orders created from WooCommerce orders. Helps identify WooCommerce orders in ERPNext reports."
+    },
+    {
+      "fieldname": "section_sync",
+      "fieldtype": "Section Break",
+      "label": "Sync Settings"
+    },
+    {
+      "fieldname": "sync_direction",
+      "fieldtype": "Select",
+      "label": "Sync Direction",
+      "options": "Both Ways\nWooCommerce to ERPNext\nERPNext to WooCommerce",
+      "default": "Both Ways",
+      "description": "Both Ways: keeps everything in sync. WooCommerce to ERPNext: WooCommerce is master. ERPNext to WooCommerce: ERPNext is master."
+    },
+    {
+      "fieldname": "api_rate_limit",
+      "fieldtype": "Int",
+      "label": "API Rate Limit (per minute)",
+      "default": "60",
+      "description": "Maximum WooCommerce API requests per minute. 60 is safe for most stores. Raise to 120 on dedicated servers."
+    },
+    {
+      "fieldname": "section_webhook",
+      "fieldtype": "Section Break",
+      "label": "Webhook Information"
+    },
+    {
+      "fieldname": "webhook_url",
+      "fieldtype": "Data",
+      "label": "Webhook URL",
+      "read_only": 1,
+      "description": "Register this URL in WooCommerce > Settings > Advanced > Webhooks. ERPNext automatically fills this based on your site URL."
+    }
+  ],
+  "issingle": 0,
+  "links": [],
+  "modified": "2026-05-28 00:00:00.000000",
+  "modified_by": "Administrator",
+  "module": "Caz Woosync",
+  "name": "Caz Woo Store",
+  "naming_rule": "By fieldname",
+  "owner": "Administrator",
+  "permissions": [
+    {
+      "create": 1,
+      "delete": 1,
+      "email": 1,
+      "export": 1,
+      "print": 1,
+      "read": 1,
+      "report": 1,
+      "role": "System Manager",
+      "share": 1,
+      "write": 1
+    },
+    {
+      "create": 1,
+      "delete": 1,
+      "email": 1,
+      "export": 1,
+      "print": 1,
+      "read": 1,
+      "report": 1,
+      "role": "Administrator",
+      "share": 1,
+      "write": 1
+    }
+  ],
+  "sort_field": "modified",
+  "sort_order": "DESC",
+  "title_field": "store_name",
+  "track_changes": 1
+}
