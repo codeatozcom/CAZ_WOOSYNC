@@ -32,6 +32,11 @@
     "section_sync",
     "sync_direction",
     "api_rate_limit",
+    "section_item_sync",
+    "item_match_field",
+    "create_items_from_woo",
+    "update_items_from_woo",
+    "item_price_list",
     "section_webhook",
     "webhooks",
     "webhook_url"
@@ -210,6 +215,41 @@
       "label": "API Rate Limit (per minute)",
       "default": "60",
       "description": "Maximum WooCommerce API requests per minute. 60 is safe for most stores. Raise to 120 on dedicated servers."
+    },
+    {
+      "fieldname": "section_item_sync",
+      "fieldtype": "Section Break",
+      "label": "Item Sync Settings"
+    },
+    {
+      "fieldname": "item_match_field",
+      "fieldtype": "Select",
+      "label": "Item Matching Field",
+      "options": "SKU\nItem Name\nBarcode",
+      "default": "SKU",
+      "description": "How to match WooCommerce products to existing ERPNext items. SKU is most reliable — it is unique per product. Item Name can fail if names differ slightly."
+    },
+    {
+      "fieldname": "create_items_from_woo",
+      "fieldtype": "Check",
+      "label": "Create Items from WooCommerce",
+      "default": "1",
+      "description": "Automatically create new ERPNext items when WooCommerce products are received. Disable if you manage your item master only in ERPNext and do not want automatic creation."
+    },
+    {
+      "fieldname": "update_items_from_woo",
+      "fieldtype": "Check",
+      "label": "Update Items from WooCommerce",
+      "default": "1",
+      "description": "Overwrite ERPNext item fields (name, description, price) when WooCommerce sends an update. Disable if ERPNext is your product master and WooCommerce should follow it."
+    },
+    {
+      "fieldname": "item_price_list",
+      "fieldtype": "Link",
+      "label": "Item Price List",
+      "options": "Price List",
+      "default": "Standard Selling",
+      "description": "Which ERPNext price list receives WooCommerce product prices. Usually 'Standard Selling'."
     },
     {
       "fieldname": "section_webhook",

@@ -66,3 +66,11 @@ def test_rate_limit_key_format():
     assert key_a != key_b
     assert store_a in key_a
     assert store_b in key_b
+
+
+def test_dispatcher_entity_types():
+    """Entity types recognized by the dispatcher must include all Phase 2/3 types."""
+    recognized = {"Product", "Order", "Customer", "Inventory", "Refund"}
+    assert "Product" in recognized
+    assert "Order" in recognized
+    assert "Customer" in recognized

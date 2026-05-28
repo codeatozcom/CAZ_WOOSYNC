@@ -1,6 +1,7 @@
 import time
 
 import frappe
+from frappe.utils import cstr
 
 
 @frappe.whitelist()
@@ -187,3 +188,42 @@ def _mark_store_failed(store_name: str):
             "last_connection_check": frappe.utils.now(),
         },
     )
+
+
+@frappe.whitelist()
+def trigger_item_sync(store_name: str, woo_product_id: str) -> dict:
+    """Manually queue a WooCommerce product for sync to ERPNext."""
+    if not frappe.db.exists("Caz Woo Store", store_name):
+        frappe.throw(f"Store '{store_name}' not found. Check the store name and try again.")
+
+    queue_doc = frappe.new_doc("Caz Woo Sync Queue")
+    queue_doc.update({
+        "store": store_name,
+        "direction": "woo_to_erp",
+        "entity_type": "Product",
+        "woo_id": cstr(woo_product_id),
+        "status": "Queued",
+        "payload": "{}",
+    })
+    queue_doc.insert(ignore_permissions=True)
+    frappe.db.commit()
+    return {"queued": True, "queue_name": queue_doc.name}
+
+
+@frappe.whitelist()
+def get_item_sync_status(store_name: str, woo_product_id: str) -> dict:
+    """Return the sync status for a WooCommerce product from the item mapping table."""
+    mapping = frappe.db.get_value(
+        "Caz Woo Item Mapping",
+        {"store": store_name, "woo_id": cstr(woo_product_id)},
+        ["erp_item", "last_synced", "product_type"],
+        as_dict=True,
+    )
+    if not mapping:
+        return {"synced": False, "message": "No mapping found for this product."}
+    return {
+        "synced": True,
+        "erp_item": mapping.erp_item,
+        "last_synced": str(mapping.last_synced or ""),
+        "product_type": mapping.product_type or "simple",
+    }

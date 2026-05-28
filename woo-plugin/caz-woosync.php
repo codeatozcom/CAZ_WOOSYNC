@@ -51,6 +51,8 @@ function caz_woosync_init() {
 	}
 	require_once CAZ_WOOSYNC_PLUGIN_DIR . 'includes/class-settings.php';
 	new CAZ_WooSync_Settings();
+	require_once CAZ_WOOSYNC_PLUGIN_DIR . 'includes/class-sync-status.php';
+	new CAZ_WooSync_Sync_Status();
 }
 add_action( 'plugins_loaded', 'caz_woosync_init' );
 
