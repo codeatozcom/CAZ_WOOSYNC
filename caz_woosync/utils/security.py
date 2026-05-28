@@ -1,3 +1,4 @@
+import base64
 import hashlib
 import hmac
 import ipaddress
@@ -8,16 +9,19 @@ import frappe
 def verify_webhook_signature(payload_bytes: bytes, signature_header: str, secret: str) -> bool:
     """
     Verify a WooCommerce webhook HMAC-SHA256 signature.
-    WooCommerce sends the hex digest in X-WC-Webhook-Signature header.
+    WooCommerce signs with HMAC-SHA256 (raw binary) then base64-encodes the result:
+      PHP: base64_encode(hash_hmac('sha256', $payload, $secret, true))
     """
     if not secret or not signature_header:
         return False
-    expected = hmac.new(
-        secret.encode("utf-8"),
-        payload_bytes,
-        hashlib.sha256,
-    ).hexdigest()
-    sig = (signature_header or "").strip().lower()
+    expected = base64.b64encode(
+        hmac.new(
+            secret.encode("utf-8"),
+            payload_bytes,
+            hashlib.sha256,
+        ).digest()
+    ).decode("utf-8").strip()
+    sig = (signature_header or "").strip()
     try:
         return hmac.compare_digest(expected, sig)
     except TypeError:

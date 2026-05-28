@@ -1,3 +1,5 @@
+from urllib.parse import quote as url_quote
+
 import frappe
 from frappe.model.document import Document
 
@@ -13,7 +15,7 @@ class CazWooStore(Document):
         site_url = frappe.utils.get_url().rstrip("/")
         self.webhook_url = (
             f"{site_url}/api/method/caz_woosync.controller.receiver.handle_webhook"
-            f"?store={frappe.utils.quote(self.name or '')}"
+            f"?store={url_quote(self.name or '')}"
         )
 
     @frappe.whitelist()
