@@ -1,0 +1,151 @@
+{
+  "actions": [],
+  "autoname": "hash",
+  "creation": "2026-05-28 00:00:00.000000",
+  "doctype": "DocType",
+  "engine": "InnoDB",
+  "field_order": [
+    "store",
+    "direction",
+    "entity_type",
+    "woo_id",
+    "erp_doctype",
+    "erp_docname",
+    "column_break_q",
+    "status",
+    "attempt_count",
+    "last_attempt",
+    "section_payload",
+    "payload",
+    "error_log"
+  ],
+  "fields": [
+    {
+      "fieldname": "store",
+      "fieldtype": "Link",
+      "label": "Store",
+      "options": "Caz Woo Store",
+      "reqd": 1,
+      "in_list_view": 1,
+      "description": "Which WooCommerce store this sync event belongs to."
+    },
+    {
+      "fieldname": "direction",
+      "fieldtype": "Select",
+      "label": "Direction",
+      "options": "woo_to_erp\nerp_to_woo",
+      "reqd": 1,
+      "in_list_view": 1,
+      "description": "Sync direction: WooCommerce to ERPNext, or ERPNext to WooCommerce."
+    },
+    {
+      "fieldname": "entity_type",
+      "fieldtype": "Select",
+      "label": "Entity Type",
+      "options": "Order\nProduct\nCustomer\nInventory\nRefund",
+      "reqd": 1,
+      "in_list_view": 1,
+      "description": "Type of record being synced."
+    },
+    {
+      "fieldname": "woo_id",
+      "fieldtype": "Data",
+      "label": "WooCommerce ID",
+      "description": "WooCommerce object ID (order ID, product ID, etc.)."
+    },
+    {
+      "fieldname": "erp_doctype",
+      "fieldtype": "Data",
+      "label": "ERPNext DocType",
+      "description": "ERPNext DocType this event maps to (e.g. Sales Order, Item)."
+    },
+    {
+      "fieldname": "erp_docname",
+      "fieldtype": "Data",
+      "label": "ERPNext Document",
+      "description": "ERPNext document name created or updated by this sync event."
+    },
+    {
+      "fieldname": "column_break_q",
+      "fieldtype": "Column Break"
+    },
+    {
+      "fieldname": "status",
+      "fieldtype": "Select",
+      "label": "Status",
+      "options": "Queued\nProcessing\nDone\nFailed\nSkipped",
+      "default": "Queued",
+      "in_list_view": 1,
+      "description": "Current processing status of this sync event."
+    },
+    {
+      "fieldname": "attempt_count",
+      "fieldtype": "Int",
+      "label": "Attempt Count",
+      "default": "0",
+      "read_only": 1,
+      "description": "Number of times this event has been attempted. After 5 failures it is marked Failed."
+    },
+    {
+      "fieldname": "last_attempt",
+      "fieldtype": "Datetime",
+      "label": "Last Attempt",
+      "read_only": 1,
+      "description": "When this sync event was last attempted."
+    },
+    {
+      "fieldname": "section_payload",
+      "fieldtype": "Section Break",
+      "label": "Payload & Errors"
+    },
+    {
+      "fieldname": "payload",
+      "fieldtype": "Long Text",
+      "label": "Payload",
+      "description": "Raw webhook payload or event data in JSON format."
+    },
+    {
+      "fieldname": "error_log",
+      "fieldtype": "Long Text",
+      "label": "Error Log",
+      "read_only": 1,
+      "description": "Error details if this sync event failed. Use this to diagnose issues."
+    }
+  ],
+  "issingle": 0,
+  "links": [],
+  "modified": "2026-05-28 00:00:00.000000",
+  "modified_by": "Administrator",
+  "module": "Caz Woosync",
+  "name": "Caz Woo Sync Queue",
+  "owner": "Administrator",
+  "permissions": [
+    {
+      "create": 1,
+      "delete": 1,
+      "email": 1,
+      "export": 1,
+      "print": 1,
+      "read": 1,
+      "report": 1,
+      "role": "System Manager",
+      "share": 1,
+      "write": 1
+    },
+    {
+      "create": 1,
+      "delete": 1,
+      "email": 1,
+      "export": 1,
+      "print": 1,
+      "read": 1,
+      "report": 1,
+      "role": "Administrator",
+      "share": 1,
+      "write": 1
+    }
+  ],
+  "sort_field": "modified",
+  "sort_order": "DESC",
+  "track_changes": 0
+}

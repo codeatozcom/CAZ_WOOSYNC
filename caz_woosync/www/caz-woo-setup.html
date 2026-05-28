@@ -1,0 +1,523 @@
+{% extends "templates/web.html" %}
+
+{% block page_content %}
+<div class="container py-5" x-data="cazWooSetup()" x-init="init()">
+
+  <!-- Step Indicator -->
+  <div class="row mb-5">
+    <div class="col-12">
+      <h1 class="mb-4">
+        <span class="text-primary">CAZ WooSync</span> — Setup Wizard
+      </h1>
+      <div class="d-flex align-items-center gap-2 mb-2">
+        <template x-for="(label, idx) in steps" :key="idx">
+          <div class="d-flex align-items-center">
+            <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold"
+                 :class="currentStep === idx + 1
+                   ? 'bg-primary text-white'
+                   : currentStep > idx + 1
+                     ? 'bg-success text-white'
+                     : 'bg-light text-muted border'"
+                 style="width:36px;height:36px;font-size:14px"
+                 x-text="currentStep > idx + 1 ? '✓' : idx + 1">
+            </div>
+            <span class="ms-1 me-3 small"
+                  :class="currentStep === idx + 1 ? 'fw-bold text-primary' : 'text-muted'"
+                  x-text="label"></span>
+            <div x-show="idx < steps.length - 1" class="border-top flex-grow-1 me-3" style="width:40px"></div>
+          </div>
+        </template>
+      </div>
+      <div class="progress" style="height:6px">
+        <div class="progress-bar bg-primary" :style="'width:' + ((currentStep - 1) / (steps.length - 1) * 100) + '%'"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 1: Welcome -->
+  <div x-show="currentStep === 1">
+    <div class="card shadow-sm">
+      <div class="card-body p-5">
+        <h2 class="card-title mb-3">Welcome to CAZ WooSync</h2>
+        <p class="lead text-muted mb-4">
+          This wizard will connect your WooCommerce store to ERPNext in about 10 minutes.
+        </p>
+        <h5>What will be configured:</h5>
+        <ul class="list-unstyled mt-3">
+          <li class="mb-2">
+            <span class="badge bg-primary me-2">1</span>
+            <strong>Store Connection</strong> — WooCommerce REST API credentials (Consumer Key & Secret)
+          </li>
+          <li class="mb-2">
+            <span class="badge bg-primary me-2">2</span>
+            <strong>Webhook Installation</strong> — 8 real-time event hooks for orders, products, and customers
+          </li>
+          <li class="mb-2">
+            <span class="badge bg-primary me-2">3</span>
+            <strong>ERPNext Defaults</strong> — Company, warehouse, accounts, item group, naming series
+          </li>
+          <li class="mb-2">
+            <span class="badge bg-success me-2">✓</span>
+            <strong>Real-time sync</strong> will begin immediately after setup is complete
+          </li>
+        </ul>
+        <div class="alert alert-info mt-4">
+          <strong>Before you start:</strong> Make sure you have generated a WooCommerce REST API key
+          (WooCommerce &rarr; Settings &rarr; Advanced &rarr; REST API) and know your ERPNext company name.
+        </div>
+        <div class="mt-4">
+          <button class="btn btn-primary btn-lg" @click="nextStep()">
+            Start Setup &rarr;
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 2: Store Connection -->
+  <div x-show="currentStep === 2">
+    <div class="card shadow-sm">
+      <div class="card-body p-5">
+        <h2 class="card-title mb-1">Store Connection</h2>
+        <p class="text-muted mb-4">Enter your WooCommerce store details and API credentials.</p>
+
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Store Name <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" x-model="form.store_name"
+                   placeholder="e.g. Main Store" />
+            <div class="form-text">A friendly label used in sync logs and reports.</div>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">WooCommerce URL <span class="text-danger">*</span></label>
+            <input type="url" class="form-control" x-model="form.woo_url"
+                   placeholder="https://mystore.com" />
+            <div class="form-text">Full store URL including https://. Do not include /wp-admin.</div>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Consumer Key <span class="text-danger">*</span></label>
+            <input type="text" class="form-control font-monospace" x-model="form.consumer_key"
+                   placeholder="ck_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" />
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Consumer Secret <span class="text-danger">*</span></label>
+            <input type="password" class="form-control font-monospace" x-model="form.consumer_secret"
+                   placeholder="cs_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" />
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Webhook Secret</label>
+            <input type="password" class="form-control font-monospace" x-model="form.webhook_secret"
+                   placeholder="A strong random secret string" />
+            <div class="form-text">Used for HMAC-SHA256 signature verification. Highly recommended.</div>
+          </div>
+        </div>
+
+        <!-- Collapsible API key guide -->
+        <div class="mt-4">
+          <button class="btn btn-outline-secondary btn-sm" type="button"
+                  @click="showApiGuide = !showApiGuide">
+            <span x-text="showApiGuide ? '▲ Hide' : '▼ Show'"></span> How to generate WooCommerce API Keys
+          </button>
+          <div x-show="showApiGuide" class="mt-3 p-4 bg-light rounded border">
+            <h6 class="fw-bold">Generating WooCommerce REST API Keys</h6>
+            <ol class="mb-0">
+              <li>Log in to your WordPress admin dashboard.</li>
+              <li>Navigate to <strong>WooCommerce &rarr; Settings &rarr; Advanced &rarr; REST API</strong>.</li>
+              <li>Click <strong>Add key</strong>.</li>
+              <li>Set <em>Description</em> to <code>CAZ WooSync</code>.</li>
+              <li>Set <em>User</em> to your admin account.</li>
+              <li>Set <em>Permissions</em> to <strong>Read/Write</strong>.</li>
+              <li>Click <strong>Generate API key</strong>.</li>
+              <li>Copy the <strong>Consumer key</strong> and <strong>Consumer secret</strong> — they are shown only once!</li>
+            </ol>
+          </div>
+        </div>
+
+        <!-- Connection test result -->
+        <div x-show="connectionResult" class="mt-4">
+          <div :class="connectionResult && connectionResult.success ? 'alert alert-success' : 'alert alert-danger'"
+               x-text="connectionResult ? connectionResult.message : ''"></div>
+        </div>
+
+        <div class="mt-4 d-flex gap-3">
+          <button class="btn btn-outline-secondary" @click="prevStep()">← Back</button>
+          <button class="btn btn-outline-primary" @click="testConnection()" :disabled="testing">
+            <span x-show="testing" class="spinner-border spinner-border-sm me-1"></span>
+            <span x-text="testing ? 'Testing...' : 'Test Connection'"></span>
+          </button>
+          <button class="btn btn-primary" @click="saveStoreAndNext()" :disabled="saving">
+            <span x-show="saving" class="spinner-border spinner-border-sm me-1"></span>
+            <span x-text="saving ? 'Saving...' : 'Save & Continue →'"></span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 3: Webhook Installation -->
+  <div x-show="currentStep === 3">
+    <div class="card shadow-sm">
+      <div class="card-body p-5">
+        <h2 class="card-title mb-1">Webhook Installation</h2>
+        <p class="text-muted mb-4">
+          Install 8 WooCommerce webhooks so ERPNext receives real-time events.
+          Your webhook URL will be registered automatically.
+        </p>
+
+        <div class="mb-4">
+          <h6 class="fw-semibold">Webhooks to install:</h6>
+          <ul class="list-group list-group-flush">
+            <template x-for="topic in webhookTopics" :key="topic.name">
+              <li class="list-group-item d-flex align-items-center gap-3 px-0">
+                <span x-show="!webhookResults" class="badge bg-secondary">Pending</span>
+                <span x-show="webhookResults && webhookResults[topic.name] === true"
+                      class="badge bg-success">✓ Installed</span>
+                <span x-show="webhookResults && webhookResults[topic.name] === 'exists'"
+                      class="badge bg-info">✓ Already installed</span>
+                <span x-show="webhookResults && webhookResults[topic.name] === false"
+                      class="badge bg-danger">✗ Failed</span>
+                <div>
+                  <div class="fw-semibold" x-text="topic.label"></div>
+                  <div class="small text-muted" x-text="topic.name"></div>
+                </div>
+              </li>
+            </template>
+          </ul>
+        </div>
+
+        <div x-show="webhookError" class="alert alert-danger" x-text="webhookError"></div>
+        <div x-show="webhookSuccess" class="alert alert-success">
+          Webhooks installed successfully. ERPNext will now receive real-time events from WooCommerce.
+        </div>
+
+        <div class="mt-4 d-flex gap-3">
+          <button class="btn btn-outline-secondary" @click="prevStep()">← Back</button>
+          <button class="btn btn-outline-primary" @click="installWebhooks()" :disabled="installingWebhooks">
+            <span x-show="installingWebhooks" class="spinner-border spinner-border-sm me-1"></span>
+            <span x-text="installingWebhooks ? 'Installing...' : 'Install Webhooks'"></span>
+          </button>
+          <button class="btn btn-primary" @click="nextStep()">
+            Continue → (skip if already installed)
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 4: ERPNext Defaults -->
+  <div x-show="currentStep === 4">
+    <div class="card shadow-sm">
+      <div class="card-body p-5">
+        <h2 class="card-title mb-1">ERPNext Defaults</h2>
+        <p class="text-muted mb-4">Map WooCommerce data to ERPNext settings. These can be changed later.</p>
+
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Company <span class="text-danger">*</span></label>
+            <select class="form-select" x-model="form.company">
+              <option value="">Select company...</option>
+              {% for c in companies %}
+              <option value="{{ c.name }}">{{ c.name }}</option>
+              {% endfor %}
+            </select>
+            <div class="form-text">WooCommerce orders created under this company.</div>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Warehouse <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" x-model="form.warehouse"
+                   placeholder="e.g. Stores - ABC" />
+            <div class="form-text">Stock levels and deliveries use this warehouse.</div>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Income Account</label>
+            <input type="text" class="form-control" x-model="form.income_account"
+                   placeholder="e.g. Sales - ABC" />
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Tax Account</label>
+            <input type="text" class="form-control" x-model="form.tax_account"
+                   placeholder="e.g. Output VAT - ABC" />
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Item Group</label>
+            <select class="form-select" x-model="form.item_group">
+              <option value="">Select item group...</option>
+              {% for g in item_groups %}
+              <option value="{{ g.name }}">{{ g.name }}</option>
+              {% endfor %}
+            </select>
+            <div class="form-text">Imported products are placed in this group.</div>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Customer Group</label>
+            <select class="form-select" x-model="form.customer_group">
+              <option value="">Select customer group...</option>
+              {% for g in customer_groups %}
+              <option value="{{ g.name }}">{{ g.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Default UOM</label>
+            <input type="text" class="form-control" x-model="form.default_uom"
+                   placeholder="Nos" value="Nos" />
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">SO Naming Series</label>
+            <input type="text" class="form-control" x-model="form.so_naming_series"
+                   placeholder="SO-CAZWOO-.YYYY.-" />
+            <div class="form-text">Naming series for Sales Orders from WooCommerce.</div>
+          </div>
+        </div>
+
+        <div x-show="defaultsError" class="alert alert-danger mt-3" x-text="defaultsError"></div>
+
+        <div class="mt-4 d-flex gap-3">
+          <button class="btn btn-outline-secondary" @click="prevStep()">← Back</button>
+          <button class="btn btn-primary" @click="saveDefaultsAndNext()" :disabled="savingDefaults">
+            <span x-show="savingDefaults" class="spinner-border spinner-border-sm me-1"></span>
+            <span x-text="savingDefaults ? 'Saving...' : 'Save & Finish →'"></span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 5: Success -->
+  <div x-show="currentStep === 5">
+    <div class="card shadow-sm text-center">
+      <div class="card-body p-5">
+        <div style="font-size:4rem" class="mb-3">🎉</div>
+        <h2 class="card-title mb-3">Setup Complete!</h2>
+        <p class="lead text-muted mb-4">
+          Your WooCommerce store is now connected to ERPNext.
+          Real-time sync is active for orders, products, and customers.
+        </p>
+
+        <div class="row justify-content-center mb-4">
+          <div class="col-md-8">
+            <div class="card bg-light">
+              <div class="card-body text-start">
+                <h6 class="fw-bold mb-3">Setup Summary</h6>
+                <dl class="row mb-0">
+                  <dt class="col-sm-5">Store Name</dt>
+                  <dd class="col-sm-7" x-text="form.store_name || '—'"></dd>
+                  <dt class="col-sm-5">WooCommerce URL</dt>
+                  <dd class="col-sm-7" x-text="form.woo_url || '—'"></dd>
+                  <dt class="col-sm-5">Company</dt>
+                  <dd class="col-sm-7" x-text="form.company || '—'"></dd>
+                  <dt class="col-sm-5">Warehouse</dt>
+                  <dd class="col-sm-7" x-text="form.warehouse || '—'"></dd>
+                  <dt class="col-sm-5">Webhooks</dt>
+                  <dd class="col-sm-7">8 installed ✓</dd>
+                </dl>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-center gap-3">
+          <a href="/caz-woo-dashboard" class="btn btn-primary btn-lg">
+            Go to Dashboard →
+          </a>
+          <a href="/app/caz-woo-store" class="btn btn-outline-secondary">
+            View Store Settings
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function cazWooSetup() {
+  return {
+    currentStep: 1,
+    steps: ['Welcome', 'Connection', 'Webhooks', 'Defaults', 'Done'],
+    showApiGuide: false,
+    testing: false,
+    saving: false,
+    savingDefaults: false,
+    installingWebhooks: false,
+    connectionResult: null,
+    webhookResults: null,
+    webhookError: null,
+    webhookSuccess: false,
+    defaultsError: null,
+    savedStoreName: null,
+
+    form: {
+      store_name: '',
+      woo_url: '',
+      consumer_key: '',
+      consumer_secret: '',
+      webhook_secret: '',
+      company: '',
+      warehouse: '',
+      income_account: '',
+      tax_account: '',
+      item_group: '',
+      customer_group: '',
+      default_uom: 'Nos',
+      so_naming_series: 'SO-CAZWOO-.YYYY.-',
+    },
+
+    webhookTopics: [
+      { name: 'order.created',   label: 'Order Created' },
+      { name: 'order.updated',   label: 'Order Updated' },
+      { name: 'order.deleted',   label: 'Order Deleted' },
+      { name: 'product.created', label: 'Product Created' },
+      { name: 'product.updated', label: 'Product Updated' },
+      { name: 'product.deleted', label: 'Product Deleted' },
+      { name: 'customer.created', label: 'Customer Created' },
+      { name: 'customer.updated', label: 'Customer Updated' },
+    ],
+
+    init() {
+      // Pre-fill from existing stores if any
+    },
+
+    nextStep() {
+      if (this.currentStep < this.steps.length) {
+        this.currentStep++;
+      }
+    },
+
+    prevStep() {
+      if (this.currentStep > 1) {
+        this.currentStep--;
+      }
+    },
+
+    testConnection() {
+      if (!this.savedStoreName) {
+        this.connectionResult = { success: false, message: 'Please save the store first.' };
+        return;
+      }
+      this.testing = true;
+      this.connectionResult = null;
+      frappe.call({
+        method: 'caz_woosync.api.connection.test_store_connection',
+        args: { store_name: this.savedStoreName },
+        callback: (r) => {
+          this.testing = false;
+          if (r.message) {
+            this.connectionResult = r.message;
+          }
+        },
+        error: () => {
+          this.testing = false;
+          this.connectionResult = { success: false, message: 'Request failed. Check browser console.' };
+        }
+      });
+    },
+
+    saveStoreAndNext() {
+      if (!this.form.store_name || !this.form.woo_url || !this.form.consumer_key || !this.form.consumer_secret) {
+        frappe.msgprint('Please fill in all required fields (Store Name, URL, Consumer Key, Consumer Secret).');
+        return;
+      }
+      this.saving = true;
+      frappe.call({
+        method: 'frappe.client.insert',
+        args: {
+          doc: {
+            doctype: 'Caz Woo Store',
+            store_name: this.form.store_name,
+            woo_url: this.form.woo_url,
+            consumer_key: this.form.consumer_key,
+            consumer_secret: this.form.consumer_secret,
+            webhook_secret: this.form.webhook_secret,
+            is_active: 1,
+          }
+        },
+        callback: (r) => {
+          this.saving = false;
+          if (r.message) {
+            this.savedStoreName = r.message.name;
+            this.nextStep();
+          }
+        },
+        error: (err) => {
+          this.saving = false;
+          frappe.msgprint('Could not save store: ' + (err.message || 'Unknown error'));
+        }
+      });
+    },
+
+    installWebhooks() {
+      if (!this.savedStoreName) {
+        this.webhookError = 'No store saved yet. Go back to Step 2 and save the store first.';
+        return;
+      }
+      this.installingWebhooks = true;
+      this.webhookError = null;
+      this.webhookSuccess = false;
+      frappe.call({
+        method: 'caz_woosync.api.connection.install_webhooks',
+        args: { store_name: this.savedStoreName },
+        callback: (r) => {
+          this.installingWebhooks = false;
+          if (r.message && r.message.results) {
+            const map = {};
+            r.message.results.forEach(res => {
+              map[res.topic] = res.note === 'already installed' ? 'exists' : res.success;
+            });
+            this.webhookResults = map;
+            const anyFailed = r.message.results.some(res => !res.success);
+            if (anyFailed) {
+              this.webhookError = 'Some webhooks failed to install. Check the list above for details.';
+            } else {
+              this.webhookSuccess = true;
+            }
+          }
+        },
+        error: (err) => {
+          this.installingWebhooks = false;
+          this.webhookError = 'Webhook installation failed: ' + (err.message || 'Unknown error');
+        }
+      });
+    },
+
+    saveDefaultsAndNext() {
+      if (!this.form.company || !this.form.warehouse) {
+        this.defaultsError = 'Company and Warehouse are required.';
+        return;
+      }
+      if (!this.savedStoreName) {
+        this.defaultsError = 'No store saved. Please go back to Step 2.';
+        return;
+      }
+      this.savingDefaults = true;
+      this.defaultsError = null;
+      frappe.call({
+        method: 'frappe.client.set_value',
+        args: {
+          doctype: 'Caz Woo Store',
+          name: this.savedStoreName,
+          fieldname: {
+            company: this.form.company,
+            warehouse: this.form.warehouse,
+            income_account: this.form.income_account,
+            tax_account: this.form.tax_account,
+            item_group: this.form.item_group,
+            customer_group: this.form.customer_group,
+            default_uom: this.form.default_uom || 'Nos',
+            so_naming_series: this.form.so_naming_series || 'SO-CAZWOO-.YYYY.-',
+          }
+        },
+        callback: (r) => {
+          this.savingDefaults = false;
+          this.nextStep();
+        },
+        error: (err) => {
+          this.savingDefaults = false;
+          this.defaultsError = 'Could not save defaults: ' + (err.message || 'Unknown error');
+        }
+      });
+    }
+  };
+}
+</script>
+{% endblock %}

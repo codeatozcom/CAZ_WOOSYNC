@@ -1,0 +1,64 @@
+name: Linters
+
+on:
+  push:
+    branches: [main, "claude/*", develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  flake8:
+    name: Python flake8
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install flake8
+        run: pip install flake8
+
+      - name: Run flake8
+        run: flake8 caz_woosync/ --max-line-length=120 --exclude=__pycache__
+
+  semgrep:
+    name: Semgrep Security Scan
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Semgrep
+        run: pip install semgrep
+
+      - name: Clone Frappe semgrep rules
+        run: git clone --depth 1 https://github.com/frappe/semgrep-rules.git frappe-semgrep-rules
+
+      - name: Run Semgrep
+        run: |
+          semgrep --config ./frappe-semgrep-rules/rules \
+                  --config r/python.lang.correctness \
+                  caz_woosync/ \
+                  --error
+
+  phpcs:
+    name: PHP CodeSniffer (WordPress Standards)
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Composer dependencies
+        run: |
+          composer global require \
+            squizlabs/php_codesniffer \
+            wp-coding-standards/wpcs \
+            dealerdirect/phpcodesniffer-composer-installer
+          echo "$HOME/.composer/vendor/bin" >> $GITHUB_PATH
+
+      - name: Run PHP_CodeSniffer
+        run: phpcs --standard=WordPress --extensions=php woo-plugin/

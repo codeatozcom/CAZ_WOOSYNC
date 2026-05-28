@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  push:
+    branches: [main, "claude/*", develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  python-tests:
+    name: Python Tests (3.${{ matrix.python-minor }})
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        python-minor: ["10", "11", "12"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.${{ matrix.python-minor }}"
+
+      - name: Install Python dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt -r requirements-dev.txt
+
+      - name: Run tests with coverage
+        run: pytest tests/ -v --tb=short --cov=caz_woosync --cov-fail-under=40
+
+  php-syntax:
+    name: PHP Syntax Check
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check PHP syntax
+        run: find woo-plugin -name "*.php" -exec php -l {} \;

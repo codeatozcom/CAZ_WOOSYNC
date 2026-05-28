@@ -1,0 +1,277 @@
+{% extends "templates/web.html" %}
+
+{% block page_content %}
+<div class="container py-4">
+
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h1 class="mb-1">
+        <span class="text-primary">CAZ WooSync</span> Dashboard
+      </h1>
+      <p class="text-muted mb-0">Real-time WooCommerce &harr; ERPNext sync status</p>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="/caz-woo-setup" class="btn btn-outline-primary btn-sm">
+        + Add Store
+      </a>
+      <button class="btn btn-outline-secondary btn-sm" onclick="location.reload()">
+        ↻ Refresh
+      </button>
+    </div>
+  </div>
+
+  <!-- Store Connection Status Cards -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <h4 class="mb-3">Store Connections</h4>
+    </div>
+    {% if stores %}
+      {% for store in stores %}
+      <div class="col-md-6 col-lg-4 mb-3">
+        <div class="card h-100 shadow-sm">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <h5 class="card-title mb-0">{{ store.store_name }}</h5>
+              {% if store.connection_status == "Connected" %}
+                <span class="badge bg-success">Connected</span>
+              {% elif store.connection_status == "Failed" %}
+                <span class="badge bg-danger">Failed</span>
+              {% else %}
+                <span class="badge bg-warning text-dark">{{ store.connection_status or "Untested" }}</span>
+              {% endif %}
+            </div>
+
+            <p class="text-muted small mb-2">
+              <a href="{{ store.woo_url }}" target="_blank" class="text-muted text-decoration-none">
+                {{ store.woo_url }}
+              </a>
+            </p>
+
+            {% if store.last_connection_check %}
+            <p class="text-muted small mb-3">
+              Last checked: {{ frappe.utils.pretty_date(store.last_connection_check) }}
+            </p>
+            {% else %}
+            <p class="text-muted small mb-3">Never tested</p>
+            {% endif %}
+
+            <div class="d-flex gap-2">
+              <button class="btn btn-sm btn-outline-primary"
+                      onclick="testConnection('{{ store.name }}', this)">
+                Re-test Connection
+              </button>
+              <button class="btn btn-sm btn-outline-secondary"
+                      onclick="repairWebhooks('{{ store.name }}', this)">
+                Repair Webhooks
+              </button>
+            </div>
+
+            <div class="mt-2 small connection-result-{{ store.name | replace(' ', '-') }}"></div>
+          </div>
+          {% if not store.is_active %}
+          <div class="card-footer bg-warning bg-opacity-10 text-warning small">
+            Sync paused (store is inactive)
+          </div>
+          {% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    {% else %}
+      <div class="col-12">
+        <div class="card shadow-sm">
+          <div class="card-body text-center py-5">
+            <h5 class="text-muted">No stores configured yet</h5>
+            <p class="text-muted">Run the setup wizard to connect your first WooCommerce store.</p>
+            <a href="/caz-woo-setup" class="btn btn-primary">Start Setup Wizard</a>
+          </div>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- Today at a Glance -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <h4 class="mb-3">Today at a Glance</h4>
+    </div>
+    {% set status_colors = {
+      'Done': 'success',
+      'Queued': 'primary',
+      'Processing': 'info',
+      'Failed': 'danger',
+      'Skipped': 'secondary'
+    } %}
+    {% if queue_summary %}
+      {% for row in queue_summary %}
+      <div class="col-6 col-md-4 col-lg-2 mb-3">
+        <div class="card text-center shadow-sm h-100">
+          <div class="card-body">
+            <div class="display-6 fw-bold text-{{ status_colors.get(row.status, 'muted') }}">
+              {{ row.count }}
+            </div>
+            <div class="small text-muted mt-1">{{ row.status }}</div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    {% else %}
+      <div class="col-12">
+        <div class="card shadow-sm">
+          <div class="card-body text-center py-4 text-muted">
+            No sync activity today yet.
+          </div>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- Recent Activity Table -->
+  <div class="row">
+    <div class="col-12">
+      <div class="card shadow-sm">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">Recent Activity</h5>
+          <span class="text-muted small">Last 20 events</span>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-hover mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>Store</th>
+                <th>Type</th>
+                <th>WC ID</th>
+                <th>Status</th>
+                <th>Last Attempt</th>
+                <th>Error</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% if recent_queue %}
+                {% for item in recent_queue %}
+                <tr>
+                  <td class="small">{{ item.store }}</td>
+                  <td class="small">
+                    <span class="badge bg-secondary">{{ item.entity_type }}</span>
+                  </td>
+                  <td class="small font-monospace">{{ item.woo_id or '—' }}</td>
+                  <td>
+                    {% if item.status == 'Done' %}
+                      <span class="badge bg-success">Done</span>
+                    {% elif item.status == 'Failed' %}
+                      <span class="badge bg-danger">Failed</span>
+                    {% elif item.status == 'Processing' %}
+                      <span class="badge bg-info">Processing</span>
+                    {% elif item.status == 'Queued' %}
+                      <span class="badge bg-primary">Queued</span>
+                    {% else %}
+                      <span class="badge bg-secondary">{{ item.status }}</span>
+                    {% endif %}
+                  </td>
+                  <td class="small text-muted">
+                    {% if item.last_attempt %}
+                      {{ frappe.utils.pretty_date(item.last_attempt) }}
+                    {% else %}
+                      —
+                    {% endif %}
+                  </td>
+                  <td class="small text-danger">
+                    {% if item.error_log %}
+                      <span title="{{ item.error_log }}">
+                        {{ item.error_log[:80] }}{% if item.error_log|length > 80 %}…{% endif %}
+                      </span>
+                    {% else %}
+                      —
+                    {% endif %}
+                  </td>
+                </tr>
+                {% endfor %}
+              {% else %}
+                <tr>
+                  <td colspan="6" class="text-center text-muted py-4">
+                    No sync events in the queue yet.
+                  </td>
+                </tr>
+              {% endif %}
+            </tbody>
+          </table>
+        </div>
+        {% if recent_queue %}
+        <div class="card-footer text-muted small">
+          <a href="/app/caz-woo-sync-queue" class="text-decoration-none">View all sync events →</a>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// Auto-refresh every 30 seconds
+setTimeout(function () { location.reload(); }, 30000);
+
+function testConnection(storeName, btn) {
+  const resultEl = document.querySelector('.connection-result-' + storeName.replace(/ /g, '-'));
+  btn.disabled = true;
+  btn.textContent = 'Testing...';
+  if (resultEl) resultEl.innerHTML = '';
+
+  frappe.call({
+    method: 'caz_woosync.api.connection.test_store_connection',
+    args: { store_name: storeName },
+    callback: function (r) {
+      btn.disabled = false;
+      btn.textContent = 'Re-test Connection';
+      if (r.message) {
+        const cls = r.message.success ? 'text-success' : 'text-danger';
+        const icon = r.message.success ? '✓' : '✗';
+        if (resultEl) {
+          resultEl.innerHTML = '<span class="' + cls + '">' + icon + ' ' +
+            frappe.utils.escape_html(r.message.message) + '</span>';
+        }
+        // Reload after 2s to refresh status badge
+        if (r.message.success) {
+          setTimeout(function () { location.reload(); }, 2000);
+        }
+      }
+    },
+    error: function () {
+      btn.disabled = false;
+      btn.textContent = 'Re-test Connection';
+      if (resultEl) {
+        resultEl.innerHTML = '<span class="text-danger">✗ Request failed</span>';
+      }
+    }
+  });
+}
+
+function repairWebhooks(storeName, btn) {
+  btn.disabled = true;
+  btn.textContent = 'Repairing...';
+
+  frappe.call({
+    method: 'caz_woosync.api.connection.repair_webhooks',
+    args: { store_name: storeName },
+    callback: function (r) {
+      btn.disabled = false;
+      btn.textContent = 'Repair Webhooks';
+      if (r.message && r.message.results) {
+        const failed = r.message.results.filter(function (x) { return !x.success; });
+        if (failed.length === 0) {
+          frappe.msgprint('All webhooks installed successfully.');
+        } else {
+          frappe.msgprint(
+            failed.length + ' webhook(s) failed to install. Check ERPNext error log for details.'
+          );
+        }
+      }
+    },
+    error: function () {
+      btn.disabled = false;
+      btn.textContent = 'Repair Webhooks';
+      frappe.msgprint('Webhook repair failed. Check the error log.');
+    }
+  });
+}
+</script>
+{% endblock %}
