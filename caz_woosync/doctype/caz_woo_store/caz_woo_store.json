@@ -50,6 +50,15 @@
     "sync_stock_to_woo",
     "sync_stock_from_woo",
     "stock_sync_threshold",
+    "section_accounting_sync",
+    "auto_create_invoice",
+    "auto_submit_invoice",
+    "auto_create_payment",
+    "auto_submit_payment",
+    "column_break_accounting",
+    "receivable_account",
+    "payment_account",
+    "invoice_naming_series",
     "section_webhook",
     "webhooks",
     "webhook_url"
@@ -348,6 +357,65 @@
       "label": "Stock Sync Threshold",
       "default": "0",
       "description": "Only push stock updates when quantity differs by more than this amount. Set to 0 to always sync. Useful for high-volume stores."
+    },
+    {
+      "fieldname": "section_accounting_sync",
+      "fieldtype": "Section Break",
+      "label": "Accounting Settings",
+      "description": "Configure automatic Sales Invoice and Payment Entry creation from WooCommerce orders."
+    },
+    {
+      "fieldname": "auto_create_invoice",
+      "fieldtype": "Check",
+      "label": "Auto Create Sales Invoice",
+      "default": "1",
+      "description": "Automatically create a Sales Invoice when a WooCommerce order is marked as completed or processing."
+    },
+    {
+      "fieldname": "auto_submit_invoice",
+      "fieldtype": "Check",
+      "label": "Auto Submit Sales Invoice",
+      "default": "0",
+      "description": "Automatically submit Sales Invoices. Enable only after testing — submitted invoices cannot be edited."
+    },
+    {
+      "fieldname": "auto_create_payment",
+      "fieldtype": "Check",
+      "label": "Auto Create Payment Entry",
+      "default": "1",
+      "description": "Automatically create a Payment Entry for paid WooCommerce orders (non-COD)."
+    },
+    {
+      "fieldname": "auto_submit_payment",
+      "fieldtype": "Check",
+      "label": "Auto Submit Payment Entry",
+      "default": "0",
+      "description": "Automatically submit Payment Entries. Enable only after testing."
+    },
+    {
+      "fieldname": "column_break_accounting",
+      "fieldtype": "Column Break"
+    },
+    {
+      "fieldname": "receivable_account",
+      "fieldtype": "Link",
+      "label": "Receivable Account",
+      "options": "Account",
+      "description": "Accounts receivable account for WooCommerce sales. Defaults to company's default receivable account if not set."
+    },
+    {
+      "fieldname": "payment_account",
+      "fieldtype": "Link",
+      "label": "Payment Account",
+      "options": "Account",
+      "description": "Bank or cash account where WooCommerce payments are received. Used in Payment Entry."
+    },
+    {
+      "fieldname": "invoice_naming_series",
+      "fieldtype": "Data",
+      "label": "Invoice Naming Series",
+      "default": "SINV-CAZWOO-.YYYY.-",
+      "description": "Naming series for Sales Invoices created from WooCommerce orders."
     },
     {
       "fieldname": "section_webhook",

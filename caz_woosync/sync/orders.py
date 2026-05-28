@@ -312,6 +312,7 @@ def _sync_billing_address(billing, customer_name, store):
 def _update_order_status(so_name, payload, store):
     """Update SO status fields when WooCommerce order status changes."""
     wc_status = (payload.get("status") or "").lower()
+    woo_order_id = str(payload.get("id") or "")
 
     if wc_status == "cancelled":
         try:
@@ -328,19 +329,18 @@ def _update_order_status(so_name, payload, store):
                 f"CAZ WooSync: Failed to cancel SO {so_name}",
             )
 
-    elif wc_status == "completed":
-        # Fulfillment handled separately; no action here
-        frappe.logger().info(
-            f"CAZ WooSync: Order {payload.get('id')} completed — fulfillment handled in a later phase."
-        )
+    # Trigger accounting sync for relevant statuses
+    if wc_status in ("completed", "processing", "cancelled", "refunded"):
+        try:
+            from caz_woosync.sync.accounting import handle_order_status_change
+            handle_order_status_change(store.name, woo_order_id, wc_status, payload)
+        except Exception:
+            frappe.log_error(
+                frappe.get_traceback(),
+                f"CAZ WooSync: Accounting sync failed for order {woo_order_id} status '{wc_status}'",
+            )
 
-    elif wc_status == "refunded":
-        # Refund handling is Phase 7 — log only
-        frappe.logger().info(
-            f"CAZ WooSync: Order {payload.get('id')} refunded — refund handling deferred to Phase 7."
-        )
-
-    else:
+    if wc_status not in ("completed", "processing", "cancelled", "refunded"):
         # Other statuses: just log and update mapping
         frappe.logger().info(
             f"CAZ WooSync: WooCommerce order {payload.get('id')} status changed to '{wc_status}'."

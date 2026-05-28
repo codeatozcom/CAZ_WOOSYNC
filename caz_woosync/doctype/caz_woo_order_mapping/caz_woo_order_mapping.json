@@ -8,6 +8,7 @@
     "store",
     "woo_order_id",
     "sales_order",
+    "si_name",
     "woo_status",
     "column_break_1",
     "erp_status",
@@ -39,6 +40,14 @@
       "options": "Sales Order",
       "in_list_view": 1,
       "description": "ERPNext Sales Order linked to this WooCommerce order."
+    },
+    {
+      "fieldname": "si_name",
+      "fieldtype": "Link",
+      "label": "Sales Invoice",
+      "options": "Sales Invoice",
+      "read_only": 1,
+      "description": "ERPNext Sales Invoice created from this WooCommerce order (set automatically during accounting sync)."
     },
     {
       "fieldname": "woo_status",
