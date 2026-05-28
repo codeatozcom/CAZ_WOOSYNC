@@ -39,4 +39,7 @@ doc_events = {
     "Stock Ledger Entry": {
         "on_submit": "caz_woosync.sync.inventory.on_stock_ledger_submit",
     },
+    "Item Price": {
+        "on_update": "caz_woosync.sync.prices.on_item_price_update",
+    },
 }

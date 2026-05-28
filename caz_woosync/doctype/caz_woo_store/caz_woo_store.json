@@ -59,6 +59,11 @@
     "receivable_account",
     "payment_account",
     "invoice_naming_series",
+    "section_price_sync",
+    "push_prices_trigger",
+    "update_prices_from_woo",
+    "sale_price_list",
+    "currency_rounding",
     "section_webhook",
     "webhooks",
     "webhook_url"
@@ -416,6 +421,41 @@
       "label": "Invoice Naming Series",
       "default": "SINV-CAZWOO-.YYYY.-",
       "description": "Naming series for Sales Invoices created from WooCommerce orders."
+    },
+    {
+      "fieldname": "section_price_sync",
+      "fieldtype": "Section Break",
+      "label": "Price Sync Settings"
+    },
+    {
+      "fieldname": "push_prices_trigger",
+      "fieldtype": "Select",
+      "label": "Push Prices Trigger",
+      "options": "Scheduled\nOn Save\nManual",
+      "default": "Scheduled",
+      "description": "When to push ERPNext price changes to WooCommerce. 'On Save' pushes immediately when an Item Price is saved. 'Scheduled' batches changes every 15 minutes. 'Manual' requires clicking Sync Prices."
+    },
+    {
+      "fieldname": "update_prices_from_woo",
+      "fieldtype": "Check",
+      "label": "Update Prices from WooCommerce",
+      "default": "1",
+      "description": "Update ERPNext Item Prices when WooCommerce product prices change. Disable if ERPNext is your price master."
+    },
+    {
+      "fieldname": "sale_price_list",
+      "fieldtype": "Link",
+      "label": "Sale Price List",
+      "options": "Price List",
+      "description": "Price list used for WooCommerce sale prices. If set, sale_price from WooCommerce is synced to this price list."
+    },
+    {
+      "fieldname": "currency_rounding",
+      "fieldtype": "Select",
+      "label": "Currency Rounding",
+      "options": "No Rounding\n2 Decimal Places\nNearest Integer",
+      "default": "2 Decimal Places",
+      "description": "How to round prices when syncing between ERPNext and WooCommerce."
     },
     {
       "fieldname": "section_webhook",

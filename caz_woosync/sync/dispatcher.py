@@ -130,6 +130,9 @@ def _route(doc):
         elif doc.entity_type == "Inventory":
             from caz_woosync.sync.inventory import sync_stock_to_woo
             sync_stock_to_woo(doc.store, doc.erp_docname)
+        elif doc.entity_type == "Price":
+            from caz_woosync.sync.prices import sync_price_to_woo
+            sync_price_to_woo(doc.store, doc.erp_docname)
         else:
             doc.mark_skipped(f"erp_to_woo not implemented for {doc.entity_type}")
     else:
