@@ -40,14 +40,25 @@ def poll_woocommerce_changes():
 
 
 def _poll_store(store):
-    """Poll a single store for changed products."""
+    """Poll a single store for changed products and orders."""
     from caz_woosync.utils.rate_limiter import WooCommerceClient
-    from frappe.utils import get_datetime
 
     client = WooCommerceClient(store.name)
     last_sync = store.last_sync_time
-    page = 1
 
+    _poll_products(store, client, last_sync)
+    _poll_orders(store, client, last_sync)
+
+    # Update last_sync_time
+    frappe.db.set_value("Caz Woo Store", store.name, "last_sync_time", frappe.utils.now())
+    frappe.db.commit()
+
+
+def _poll_products(store, client, last_sync):
+    """Poll WooCommerce products modified since last_sync_time."""
+    from frappe.utils import get_datetime
+
+    page = 1
     while True:
         resp = client.get(
             "products",
@@ -100,9 +111,64 @@ def _poll_store(store):
             break
         page += 1
 
-    # Update last_sync_time
-    frappe.db.set_value("Caz Woo Store", store.name, "last_sync_time", frappe.utils.now())
-    frappe.db.commit()
+
+def _poll_orders(store, client, last_sync):
+    """Poll WooCommerce orders modified since last_sync_time."""
+    from frappe.utils import get_datetime
+
+    page = 1
+    while True:
+        resp = client.get(
+            "orders",
+            params={"orderby": "modified", "order": "desc", "per_page": 50, "page": page},
+        )
+        if resp.status_code != 200:
+            break
+
+        orders = resp.json()
+        if not orders:
+            break
+
+        found_older = False
+        for order in orders:
+            date_modified = order.get("date_modified")
+            if last_sync and date_modified:
+                try:
+                    mod_dt = get_datetime(date_modified.replace("T", " "))
+                    if mod_dt <= get_datetime(last_sync):
+                        found_older = True
+                        break
+                except Exception:
+                    pass
+
+            woo_id = str(order.get("id", ""))
+            if not woo_id:
+                continue
+
+            # Skip if already queued
+            if frappe.db.exists(
+                "Caz Woo Sync Queue",
+                {"store": store.name, "woo_id": woo_id, "entity_type": "Order",
+                 "status": ["in", ["Queued", "Processing"]]},
+            ):
+                continue
+
+            queue_doc = frappe.new_doc("Caz Woo Sync Queue")
+            queue_doc.update({
+                "store": store.name,
+                "direction": "woo_to_erp",
+                "entity_type": "Order",
+                "woo_id": woo_id,
+                "status": "Queued",
+                "payload": "{}",
+            })
+            queue_doc.insert(ignore_permissions=True)
+
+        frappe.db.commit()
+
+        if found_older or len(orders) < 50:
+            break
+        page += 1
 
 
 def daily_health_check():

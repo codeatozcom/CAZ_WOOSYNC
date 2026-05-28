@@ -107,7 +107,10 @@ def _route(doc):
             payload = json.loads(doc.payload) if doc.payload and doc.payload != "{}" else None
             sync_product_to_erp(doc.store, doc.woo_id, payload)
         elif doc.entity_type == "Order":
-            doc.mark_skipped("Order sync not yet implemented (Phase 4)")
+            from caz_woosync.sync.orders import sync_order_to_erp
+            import json
+            payload = json.loads(doc.payload) if doc.payload and doc.payload != "{}" else None
+            sync_order_to_erp(doc.store, doc.woo_id, payload)
         elif doc.entity_type == "Customer":
             doc.mark_skipped("Customer sync not yet implemented (Phase 5)")
         elif doc.entity_type == "Inventory":

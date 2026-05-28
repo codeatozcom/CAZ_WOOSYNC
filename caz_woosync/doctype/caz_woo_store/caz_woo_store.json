@@ -38,6 +38,10 @@
     "update_items_from_woo",
     "item_price_list",
     "last_sync_time",
+    "section_order_sync",
+    "create_so_from_woo",
+    "so_auto_submit",
+    "shipping_item_code",
     "section_webhook",
     "webhooks",
     "webhook_url"
@@ -258,6 +262,32 @@
       "label": "Last Sync Time",
       "read_only": 1,
       "description": "When this store last completed a poll for WooCommerce changes. Updated automatically by the scheduler."
+    },
+    {
+      "fieldname": "section_order_sync",
+      "fieldtype": "Section Break",
+      "label": "Order Sync Settings"
+    },
+    {
+      "fieldname": "create_so_from_woo",
+      "fieldtype": "Check",
+      "label": "Create Sales Orders from WooCommerce",
+      "default": "1",
+      "description": "Automatically create ERPNext Sales Orders when WooCommerce orders arrive. Disable to handle orders manually."
+    },
+    {
+      "fieldname": "so_auto_submit",
+      "fieldtype": "Check",
+      "label": "Auto-Submit Sales Orders",
+      "default": "0",
+      "description": "Automatically submit Sales Orders after creation. Leave unchecked to review orders before submission."
+    },
+    {
+      "fieldname": "shipping_item_code",
+      "fieldtype": "Data",
+      "label": "Shipping Item Code",
+      "default": "Shipping",
+      "description": "ERPNext item code used for WooCommerce shipping charges. Created automatically if it doesn't exist."
     },
     {
       "fieldname": "section_webhook",
