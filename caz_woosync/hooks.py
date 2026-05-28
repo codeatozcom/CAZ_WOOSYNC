@@ -15,8 +15,11 @@ after_uninstall = "caz_woosync.install.after_uninstall"
 
 scheduler_events = {
     "cron": {
-        "*/15 * * * *": [
+        "*/5 * * * *": [
             "caz_woosync.tasks.process_sync_queue",
+        ],
+        "*/15 * * * *": [
+            "caz_woosync.tasks.poll_woocommerce_changes",
         ],
     },
     "daily": [
@@ -29,4 +32,8 @@ doctype_js = {
     "Caz Woo Sync Queue": "doctype/caz_woo_sync_queue/caz_woo_sync_queue.js",
 }
 
-doc_events = {}
+doc_events = {
+    "Item": {
+        "on_update": "caz_woosync.sync.items.on_item_update",
+    }
+}

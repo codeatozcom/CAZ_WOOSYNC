@@ -1,0 +1,113 @@
+{
+ "actions": [],
+ "autoname": "hash",
+ "creation": "2026-05-28 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "store",
+  "woo_id",
+  "erp_item",
+  "product_type",
+  "column_break_1",
+  "woo_variant_id",
+  "last_synced",
+  "woo_sku"
+ ],
+ "fields": [
+  {
+   "fieldname": "store",
+   "fieldtype": "Link",
+   "label": "Store",
+   "options": "Caz Woo Store",
+   "reqd": 1,
+   "in_list_view": 1,
+   "description": "Which WooCommerce store this mapping belongs to."
+  },
+  {
+   "fieldname": "woo_id",
+   "fieldtype": "Data",
+   "label": "WooCommerce Product ID",
+   "reqd": 1,
+   "in_list_view": 1,
+   "description": "WooCommerce numeric product ID. This is the primary identifier from the WooCommerce database."
+  },
+  {
+   "fieldname": "erp_item",
+   "fieldtype": "Link",
+   "label": "ERPNext Item",
+   "options": "Item",
+   "reqd": 1,
+   "in_list_view": 1,
+   "description": "The ERPNext Item linked to this WooCommerce product. Used to sync pricing, stock, and status."
+  },
+  {
+   "fieldname": "product_type",
+   "fieldtype": "Select",
+   "label": "Product Type",
+   "options": "simple\nvariable\nvariation",
+   "default": "simple",
+   "description": "WooCommerce product type. Variable products have child variations, each mapped separately."
+  },
+  {
+   "fieldname": "column_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "woo_variant_id",
+   "fieldtype": "Data",
+   "label": "WooCommerce Variation ID",
+   "description": "For variable product variations only. Leave blank for simple products and variable product templates."
+  },
+  {
+   "fieldname": "last_synced",
+   "fieldtype": "Datetime",
+   "label": "Last Synced",
+   "read_only": 1,
+   "description": "When this item was last successfully synced between ERPNext and WooCommerce."
+  },
+  {
+   "fieldname": "woo_sku",
+   "fieldtype": "Data",
+   "label": "WooCommerce SKU",
+   "description": "WooCommerce SKU at time of last sync. Used for matching on re-import and conflict detection."
+  }
+ ],
+ "issingle": 0,
+ "links": [],
+ "modified": "2026-05-28 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Caz Woosync",
+ "name": "Caz Woo Item Mapping",
+ "naming_rule": "Random",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Administrator",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 0
+}
