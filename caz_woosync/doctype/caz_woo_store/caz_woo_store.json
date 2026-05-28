@@ -37,6 +37,7 @@
     "create_items_from_woo",
     "update_items_from_woo",
     "item_price_list",
+    "last_sync_time",
     "section_webhook",
     "webhooks",
     "webhook_url"
@@ -227,7 +228,7 @@
       "label": "Item Matching Field",
       "options": "SKU\nItem Name\nBarcode",
       "default": "SKU",
-      "description": "How to match WooCommerce products to existing ERPNext items. SKU is most reliable — it is unique per product. Item Name can fail if names differ slightly."
+      "description": "How to match WooCommerce products to existing ERPNext items. SKU is most reliable \u2014 it is unique per product. Item Name can fail if names differ slightly."
     },
     {
       "fieldname": "create_items_from_woo",
@@ -250,6 +251,13 @@
       "options": "Price List",
       "default": "Standard Selling",
       "description": "Which ERPNext price list receives WooCommerce product prices. Usually 'Standard Selling'."
+    },
+    {
+      "fieldname": "last_sync_time",
+      "fieldtype": "Datetime",
+      "label": "Last Sync Time",
+      "read_only": 1,
+      "description": "When this store last completed a poll for WooCommerce changes. Updated automatically by the scheduler."
     },
     {
       "fieldname": "section_webhook",
