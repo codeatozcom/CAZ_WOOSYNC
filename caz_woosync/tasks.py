@@ -48,6 +48,7 @@ def _poll_store(store):
 
     _poll_products(store, client, last_sync)
     _poll_orders(store, client, last_sync)
+    _poll_customers(store, client, last_sync)
 
     # Update last_sync_time
     frappe.db.set_value("Caz Woo Store", store.name, "last_sync_time", frappe.utils.now())
@@ -167,6 +168,65 @@ def _poll_orders(store, client, last_sync):
         frappe.db.commit()
 
         if found_older or len(orders) < 50:
+            break
+        page += 1
+
+
+def _poll_customers(store, client, last_sync):
+    """Poll WooCommerce customers modified since last_sync_time."""
+    from frappe.utils import get_datetime
+
+    page = 1
+    while True:
+        resp = client.get(
+            "customers",
+            params={"orderby": "modified", "order": "desc", "per_page": 50, "page": page},
+        )
+        if resp.status_code != 200:
+            break
+
+        customers = resp.json()
+        if not customers:
+            break
+
+        found_older = False
+        for customer in customers:
+            date_modified = customer.get("date_modified")
+            if last_sync and date_modified:
+                try:
+                    mod_dt = get_datetime(date_modified.replace("T", " "))
+                    if mod_dt <= get_datetime(last_sync):
+                        found_older = True
+                        break
+                except Exception:
+                    pass
+
+            woo_id = str(customer.get("id", ""))
+            if not woo_id:
+                continue
+
+            # Skip if already queued
+            if frappe.db.exists(
+                "Caz Woo Sync Queue",
+                {"store": store.name, "woo_id": woo_id, "entity_type": "Customer",
+                 "status": ["in", ["Queued", "Processing"]]},
+            ):
+                continue
+
+            queue_doc = frappe.new_doc("Caz Woo Sync Queue")
+            queue_doc.update({
+                "store": store.name,
+                "direction": "woo_to_erp",
+                "entity_type": "Customer",
+                "woo_id": woo_id,
+                "status": "Queued",
+                "payload": "{}",
+            })
+            queue_doc.insert(ignore_permissions=True)
+
+        frappe.db.commit()
+
+        if found_older or len(customers) < 50:
             break
         page += 1
 

@@ -42,6 +42,10 @@
     "create_so_from_woo",
     "so_auto_submit",
     "shipping_item_code",
+    "section_customer_sync",
+    "sync_customers_from_woo",
+    "update_customers_from_woo",
+    "default_territory",
     "section_webhook",
     "webhooks",
     "webhook_url"
@@ -288,6 +292,32 @@
       "label": "Shipping Item Code",
       "default": "Shipping",
       "description": "ERPNext item code used for WooCommerce shipping charges. Created automatically if it doesn't exist."
+    },
+    {
+      "fieldname": "section_customer_sync",
+      "fieldtype": "Section Break",
+      "label": "Customer Sync Settings"
+    },
+    {
+      "fieldname": "sync_customers_from_woo",
+      "fieldtype": "Check",
+      "label": "Sync Customers from WooCommerce",
+      "default": "1",
+      "description": "Automatically create ERPNext Customers when WooCommerce customer webhooks arrive."
+    },
+    {
+      "fieldname": "update_customers_from_woo",
+      "fieldtype": "Check",
+      "label": "Update Customers from WooCommerce",
+      "default": "1",
+      "description": "Overwrite ERPNext Customer data when WooCommerce sends updates. Disable if ERPNext is your customer master."
+    },
+    {
+      "fieldname": "default_territory",
+      "fieldtype": "Link",
+      "label": "Default Territory",
+      "options": "Territory",
+      "description": "Default territory for WooCommerce customers. Defaults to 'All Territories' if not set."
     },
     {
       "fieldname": "section_webhook",

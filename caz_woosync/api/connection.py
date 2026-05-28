@@ -252,6 +252,46 @@ def trigger_order_sync(store_name: str, woo_order_id: str) -> dict:
 
 
 @frappe.whitelist()
+def get_customer_sync_status(store_name: str, woo_customer_id: str) -> dict:
+    """Return sync status for a WooCommerce customer."""
+    mapping = frappe.db.get_value(
+        "Caz Woo Customer Mapping",
+        {"store": store_name, "woo_customer_id": cstr(woo_customer_id)},
+        ["customer", "woo_email", "last_synced", "sync_error"],
+        as_dict=True,
+    )
+    if not mapping:
+        return {"synced": False, "message": "No mapping found for this customer."}
+    return {
+        "synced": True,
+        "customer": mapping.customer,
+        "woo_email": mapping.woo_email or "",
+        "last_synced": str(mapping.last_synced or ""),
+        "sync_error": mapping.sync_error or "",
+    }
+
+
+@frappe.whitelist()
+def trigger_customer_sync(store_name: str, woo_customer_id: str) -> dict:
+    """Manually queue a WooCommerce customer for sync."""
+    if not frappe.db.exists("Caz Woo Store", store_name):
+        frappe.throw(f"Store '{store_name}' not found. Check the store name and try again.")
+
+    queue_doc = frappe.new_doc("Caz Woo Sync Queue")
+    queue_doc.update({
+        "store": store_name,
+        "direction": "woo_to_erp",
+        "entity_type": "Customer",
+        "woo_id": cstr(woo_customer_id),
+        "status": "Queued",
+        "payload": "{}",
+    })
+    queue_doc.insert(ignore_permissions=True)
+    frappe.db.commit()
+    return {"queued": True, "queue_name": queue_doc.name}
+
+
+@frappe.whitelist()
 def get_item_sync_status(store_name: str, woo_product_id: str) -> dict:
     """Return the sync status for a WooCommerce product from the item mapping table."""
     mapping = frappe.db.get_value(
