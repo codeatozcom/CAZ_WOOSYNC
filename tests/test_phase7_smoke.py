@@ -62,6 +62,7 @@ def _make_frappe_stub():
 
     html_utils_mod = types.ModuleType("frappe.utils.html_utils")
     html_utils_mod.strip_html = lambda s: s
+    utils_mod.strip_html = lambda s: s or ""
     frappe_mod.utils.html_utils = html_utils_mod
 
     model_mod = types.ModuleType("frappe.model")

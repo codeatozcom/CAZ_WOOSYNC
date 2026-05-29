@@ -46,6 +46,15 @@ def _make_frappe_stub():
     utils_mod = types.ModuleType("frappe.utils")
     utils_mod.today = MagicMock(return_value="2026-05-29")
     utils_mod.nowdate = MagicMock(return_value="2026-05-29")
+    utils_mod.now = MagicMock(return_value="2026-05-29 00:00:00")
+    utils_mod.now_datetime = MagicMock()
+    utils_mod.get_datetime = MagicMock()
+    utils_mod.add_to_date = MagicMock()
+    utils_mod.time_diff_in_seconds = MagicMock(return_value=9999)
+    utils_mod.escape_html = MagicMock(side_effect=lambda x: x)
+    utils_mod.strip_html = MagicMock(side_effect=lambda x: x)
+    utils_mod.cstr = MagicMock(side_effect=lambda x: str(x) if x is not None else "")
+    utils_mod.flt = MagicMock(side_effect=lambda x, *a: float(x) if x else 0.0)
     frappe_mod.utils = utils_mod
 
     # AuthenticationError, ValidationError
@@ -56,7 +65,11 @@ def _make_frappe_stub():
     frappe_mod.ValidationError = _FrappeError
     frappe_mod.DoesNotExistError = _FrappeError
 
-    # local
+    # flags and local
+    flags = types.SimpleNamespace(
+        in_migrate=False, in_patch=False, in_import=False, in_install=False
+    )
+    frappe_mod.flags = flags
     frappe_mod.local = MagicMock()
     frappe_mod.form_dict = {}
     frappe_mod.response = {}
