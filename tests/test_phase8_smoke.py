@@ -104,6 +104,8 @@ sys.modules["caz_woosync.sync"] = sync_pkg
 
 def _load_prices_module():
     """Load prices.py fresh from disk (bypasses cached sys.modules)."""
+    # Re-inject our stub rate_limiter in case another test module cleared it
+    sys.modules["caz_woosync.utils.rate_limiter"] = rate_limiter_mod
     spec = importlib.util.spec_from_file_location(
         "caz_woosync.sync.prices_fresh",
         ROOT / "caz_woosync" / "sync" / "prices.py",
