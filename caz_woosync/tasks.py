@@ -232,18 +232,20 @@ def _poll_customers(store, client, last_sync):
 
 
 def daily_health_check():
-    """Scheduled daily. Checks connection health for all active stores."""
-    stores = frappe.get_all(
-        "Caz Woo Store",
-        filters={"is_active": 1},
-        fields=["name"],
-    )
+    """Scheduled daily. Checks connection health for all active stores and sends digests."""
+    stores = frappe.get_all("Caz Woo Store", filters={"is_active": 1}, fields=["name"])
     for store in stores:
         try:
             from caz_woosync.api.connection import test_store_connection
-            test_store_connection(store.name)
+            result = test_store_connection(store.name)
+            if not result.get("success"):
+                from caz_woosync.utils.alerts import send_connection_alert
+                send_connection_alert(store.name, result.get("message", ""))
         except Exception:
-            frappe.log_error(
-                frappe.get_traceback(),
-                f"CAZ WooSync health check failed: {store.name}",
-            )
+            frappe.log_error(frappe.get_traceback(), f"CAZ WooSync health check failed: {store.name}")
+
+        try:
+            from caz_woosync.utils.alerts import send_daily_digest
+            send_daily_digest(store.name)
+        except Exception:
+            frappe.log_error(frappe.get_traceback(), f"CAZ WooSync digest failed: {store.name}")

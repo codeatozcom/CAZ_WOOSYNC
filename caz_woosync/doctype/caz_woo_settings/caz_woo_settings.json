@@ -15,7 +15,13 @@
     "section_logging",
     "enable_debug_logging",
     "alert_email",
-    "log_retention_days"
+    "log_retention_days",
+    "section_alert_settings",
+    "send_daily_digest",
+    "digest_hour",
+    "column_break_alert",
+    "alert_on_connection_failure",
+    "alert_threshold_failures"
   ],
   "fields": [
     {
@@ -82,7 +88,7 @@
       "fieldname": "alert_email",
       "fieldtype": "Data",
       "label": "Alert Email",
-      "description": "Email address to notify when sync failures occur or connection goes down. Leave blank to disable alerts."
+      "description": "Email address to receive sync failure alerts and daily digests. Leave blank to disable email alerts."
     },
     {
       "fieldname": "log_retention_days",
@@ -90,6 +96,43 @@
       "label": "Log Retention (Days)",
       "default": "30",
       "description": "Delete sync queue records older than this many days. Keeps your database from growing too large."
+    },
+    {
+      "fieldname": "section_alert_settings",
+      "fieldtype": "Section Break",
+      "label": "Alert Settings"
+    },
+    {
+      "fieldname": "send_daily_digest",
+      "fieldtype": "Check",
+      "label": "Send Daily Digest",
+      "default": "0",
+      "description": "Send a daily email digest summarising sync activity, failures, and store health. Requires alert_email to be set."
+    },
+    {
+      "fieldname": "digest_hour",
+      "fieldtype": "Int",
+      "label": "Digest Hour",
+      "default": "8",
+      "description": "Hour of day (0-23) to send the daily digest email. Uses server timezone."
+    },
+    {
+      "fieldname": "column_break_alert",
+      "fieldtype": "Column Break"
+    },
+    {
+      "fieldname": "alert_on_connection_failure",
+      "fieldtype": "Check",
+      "label": "Alert on Connection Failure",
+      "default": "1",
+      "description": "Send an alert email when a WooCommerce store connection test fails."
+    },
+    {
+      "fieldname": "alert_threshold_failures",
+      "fieldtype": "Int",
+      "label": "Alert Threshold (Failures)",
+      "default": "3",
+      "description": "Send an alert only after this many consecutive sync failures for the same item. Set to 1 to alert on first failure."
     }
   ],
   "issingle": 1,

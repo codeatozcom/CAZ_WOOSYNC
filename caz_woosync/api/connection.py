@@ -33,6 +33,11 @@ def test_store_connection(store_name: str) -> dict:
             }
         else:
             _mark_store_failed(store_name)
+            try:
+                from caz_woosync.utils.alerts import send_connection_alert
+                send_connection_alert(store_name, f"HTTP {response.status_code}")
+            except Exception:
+                frappe.log_error(frappe.get_traceback(), "CAZ WooSync: send_connection_alert failed")
             return {
                 "success": False,
                 "message": (
@@ -44,6 +49,11 @@ def test_store_connection(store_name: str) -> dict:
     except Exception as exc:
         _mark_store_failed(store_name)
         frappe.log_error(frappe.get_traceback(), f"CAZ WooSync: connection test failed for {store_name}")
+        try:
+            from caz_woosync.utils.alerts import send_connection_alert
+            send_connection_alert(store_name, str(exc))
+        except Exception:
+            frappe.log_error(frappe.get_traceback(), "CAZ WooSync: send_connection_alert failed")
         return {
             "success": False,
             "message": (

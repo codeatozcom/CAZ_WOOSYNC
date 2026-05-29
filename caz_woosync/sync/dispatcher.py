@@ -147,20 +147,13 @@ def _route(doc):
 def _send_failure_alert(doc):
     """Send alert email when a queue item exhausts all retry attempts."""
     try:
-        settings = frappe.get_single("Caz Woo Settings")
-        if settings.alert_email:
-            frappe.sendmail(
-                recipients=[settings.alert_email],
-                subject=f"CAZ WooSync: Sync Failed — {doc.entity_type} #{doc.woo_id}",
-                message=(
-                    f"Sync queue item <strong>{doc.name}</strong> failed after "
-                    f"{MAX_ATTEMPTS} attempts.<br><br>"
-                    f"<strong>Store:</strong> {frappe.utils.escape_html(doc.store)}<br>"
-                    f"<strong>Entity:</strong> {frappe.utils.escape_html(doc.entity_type)} "
-                    f"#{frappe.utils.escape_html(str(doc.woo_id))}<br><br>"
-                    f"<strong>Error:</strong><br><pre>{frappe.utils.escape_html(doc.error_log or '')}</pre>"
-                ),
-                now=True,
-            )
+        from caz_woosync.utils.alerts import send_sync_failure_alert
+        send_sync_failure_alert(
+            doc.store,
+            doc.entity_type,
+            doc.woo_id,
+            doc.error_log or "",
+            doc.attempt_count or 0,
+        )
     except Exception:
         frappe.log_error(frappe.get_traceback(), "CAZ WooSync: failed to send failure alert")
