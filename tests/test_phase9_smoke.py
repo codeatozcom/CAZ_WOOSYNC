@@ -106,13 +106,21 @@ if "caz_woosync.utils.rate_limiter" not in sys.modules:
 
 rate_limiter_mod = sys.modules["caz_woosync.utils.rate_limiter"]
 
-# Stub caz_woosync.utils
-utils_pkg = types.ModuleType("caz_woosync.utils")
-sys.modules["caz_woosync.utils"] = utils_pkg
+# Stub caz_woosync.utils (only if not already the real module)
+if not hasattr(sys.modules.get("caz_woosync.utils"), "__file__"):
+    utils_pkg = types.ModuleType("caz_woosync.utils")
+    sys.modules["caz_woosync.utils"] = utils_pkg
 
-# Stub caz_woosync.sync package
-sync_pkg = types.ModuleType("caz_woosync.sync")
-sys.modules["caz_woosync.sync"] = sync_pkg
+# Stub caz_woosync.sync package (only if not already the real module)
+if not hasattr(sys.modules.get("caz_woosync.sync"), "__file__"):
+    sync_pkg = types.ModuleType("caz_woosync.sync")
+    sys.modules["caz_woosync.sync"] = sync_pkg
+
+# Ensure the real caz_woosync root package is not replaced
+import importlib as _importlib
+if not hasattr(sys.modules.get("caz_woosync"), "__version__"):
+    _real_pkg = _importlib.import_module("caz_woosync")
+    sys.modules["caz_woosync"] = _real_pkg
 
 
 def _load_items_module():
