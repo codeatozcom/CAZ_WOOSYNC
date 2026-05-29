@@ -24,6 +24,13 @@ def get_data():
                     "name": "caz-woo-queue",
                     "description": "View and manage the WooCommerce sync queue for all stores.",
                 },
+                {
+                    "label": _("Bulk Import"),
+                    "icon": "octicon octicon-cloud-download",
+                    "type": "page",
+                    "name": "caz-woo-import",
+                    "description": "Bulk import WooCommerce products, orders, and customers into ERPNext.",
+                },
             ],
         }
     ]

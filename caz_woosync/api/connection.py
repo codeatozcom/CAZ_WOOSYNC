@@ -155,6 +155,35 @@ def get_all_stores_health() -> list:
 
 
 @frappe.whitelist()
+def start_bulk_import(store_name, entity_types=None, since_date=None, limit=None):
+    """
+    Kick off a bulk import of WooCommerce data.
+    entity_types: JSON string or list of "Product"|"Order"|"Customer" (default: all three)
+    since_date: only import records created/modified after this date (ISO string)
+    limit: max records per entity type (None = all)
+    Returns {"queued": [...entity_types...]}
+    """
+    import json
+
+    from caz_woosync.sync.bulk_import import start_bulk_import as _start
+
+    if isinstance(entity_types, str):
+        entity_types = json.loads(entity_types)
+    return _start(store_name, entity_types, since_date, int(limit) if limit else None)
+
+
+@frappe.whitelist()
+def get_import_progress(store_name):
+    """
+    Return import progress stats for the given store.
+    Returns queued, processing, done, failed counts and total_mapped breakdown.
+    """
+    from caz_woosync.sync.bulk_import import get_import_progress
+
+    return get_import_progress(store_name)
+
+
+@frappe.whitelist()
 def get_store_health(store_name: str) -> dict:
     """Return health summary for one store.
 
