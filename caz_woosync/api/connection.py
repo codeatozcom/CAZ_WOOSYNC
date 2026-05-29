@@ -386,3 +386,20 @@ def get_item_sync_status(store_name: str, woo_product_id: str) -> dict:
         "last_synced": str(mapping.last_synced or ""),
         "product_type": mapping.product_type or "simple",
     }
+
+
+@frappe.whitelist()
+def sync_all_coupons(store_name):
+    """Trigger bulk coupon sync from WooCommerce."""
+    frappe.enqueue("caz_woosync.sync.coupons.sync_all_coupons",
+                   queue="long", timeout=3600, store_name=store_name)
+    return {"queued": True}
+
+
+@frappe.whitelist()
+def handle_refund(store_name, woo_order_id):
+    """Manually trigger refund processing for an order."""
+    frappe.enqueue("caz_woosync.sync.refunds.handle_refund",
+                   queue="default", timeout=300,
+                   store_name=store_name, woo_order_id=woo_order_id)
+    return {"queued": True}

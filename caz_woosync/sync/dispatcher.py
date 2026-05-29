@@ -121,6 +121,11 @@ def _route(doc):
             import json
             payload = json.loads(doc.payload) if doc.payload and doc.payload != "{}" else None
             sync_stock_from_woo(doc.store, doc.woo_id, payload)
+        elif doc.entity_type == "Coupon":
+            from caz_woosync.sync.coupons import sync_coupon_to_erp
+            import json
+            payload = json.loads(doc.payload) if doc.payload and doc.payload != "{}" else None
+            sync_coupon_to_erp(doc.store, doc.woo_id, payload)
         else:
             doc.mark_skipped(f"Unknown entity type: {doc.entity_type}")
     elif doc.direction == "erp_to_woo":

@@ -325,9 +325,8 @@ def handle_order_status_change(store_name, woo_order_id, new_status, payload):
         _cancel_accounting_docs(store_name, so_name, woo_order_id)
 
     elif status == "refunded":
-        frappe.logger().warning(
-            f"CAZ WooSync: Order {woo_order_id} refunded — full refund handling deferred to Phase 12."
-        )
+        from caz_woosync.sync.refunds import handle_refund
+        handle_refund(store_name, woo_order_id, payload)
 
     else:
         # Other statuses (pending, on-hold, failed, etc.) — no accounting action

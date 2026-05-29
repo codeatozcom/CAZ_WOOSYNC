@@ -105,6 +105,7 @@ def _topic_to_entity(topic: str):
         "order": "Order",
         "product": "Product",
         "customer": "Customer",
+        "coupon": "Coupon",
     }
     resource = topic.split(".")[0] if topic else ""
     return mapping.get(resource)
