@@ -10,6 +10,29 @@ class CazWooStore(Document):
             self.woo_url = self.woo_url.rstrip("/")
         if not self.woo_api_version:
             self.woo_api_version = "wc/v3"
+        self._validate_url()
+        self._validate_no_duplicate_url()
+
+    def _validate_url(self):
+        """Ensure woo_url starts with https:// for security."""
+        if self.woo_url and not self.woo_url.startswith("https://"):
+            frappe.throw(
+                "WooCommerce URL must start with https://. HTTP is not supported for security reasons."
+            )
+
+    def _validate_no_duplicate_url(self):
+        """Prevent two active stores pointing to the same WooCommerce URL."""
+        if self.woo_url:
+            existing = frappe.db.get_value(
+                "Caz Woo Store",
+                {"woo_url": self.woo_url, "name": ["!=", self.name], "is_active": 1},
+                "name",
+            )
+            if existing:
+                frappe.throw(
+                    f"Store '{existing}' is already configured for this WooCommerce URL."
+                    " Each store URL must be unique."
+                )
 
     def before_save(self):
         site_url = frappe.utils.get_url().rstrip("/")

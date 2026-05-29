@@ -1,0 +1,13 @@
+{
+ "creation": "2026-05-29 00:00:00.000000",
+ "doctype": "Page",
+ "module": "Caz Woosync",
+ "name": "caz-woo-dashboard",
+ "page_name": "caz-woo-dashboard",
+ "roles": [
+  {"role": "System Manager"},
+  {"role": "Administrator"}
+ ],
+ "system_page": 0,
+ "title": "CAZ WooSync Dashboard"
+}

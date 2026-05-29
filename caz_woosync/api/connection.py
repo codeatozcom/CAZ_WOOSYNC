@@ -144,6 +144,31 @@ def install_webhooks(store_name: str) -> dict:
 
 
 @frappe.whitelist()
+def get_all_stores_health() -> list:
+    """Return health summary for all active stores.
+
+    Returns:
+        list of store health dicts from store_manager.get_all_stores_health().
+    """
+    from caz_woosync.utils.store_manager import get_all_stores_health as _all_health
+    return _all_health()
+
+
+@frappe.whitelist()
+def get_store_health(store_name: str) -> dict:
+    """Return health summary for one store.
+
+    Args:
+        store_name: name of the Caz Woo Store record.
+
+    Returns:
+        dict with store health keys (see store_manager.get_store_health).
+    """
+    from caz_woosync.utils.store_manager import get_store_health as _health
+    return _health(store_name)
+
+
+@frappe.whitelist()
 def get_connection_status(store_name: str) -> dict:
     """Return current connection status and stats for the dashboard."""
     store = frappe.get_doc("Caz Woo Store", store_name)
