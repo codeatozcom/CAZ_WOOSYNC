@@ -9,6 +9,7 @@ class CAZ_WooSync_Settings {
 		add_action( 'woocommerce_update_options_caz_woosync', [ $this, 'save_settings' ] );
 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_scripts' ] );
 		add_action( 'wp_ajax_caz_woosync_test_connection', [ $this, 'ajax_test_connection' ] );
+		add_action( 'wp_ajax_caz_woosync_install_webhooks', [ $this, 'ajax_install_webhooks' ] );
 	}
 
 	public function add_settings_tab( $tabs ) {
@@ -18,10 +19,61 @@ class CAZ_WooSync_Settings {
 
 	public function render_settings() {
 		woocommerce_admin_fields( $this->get_settings() );
+		echo '<p><button type="button" id="caz-install-webhooks" class="button button-secondary">'
+			. esc_html__( 'Install Webhooks', 'caz-woosync' ) . '</button>'
+			. ' <span id="caz-webhook-result" style="margin-left:10px"></span></p>';
 	}
 
 	public function save_settings() {
 		woocommerce_update_options( $this->get_settings() );
+		$this->install_webhooks();
+	}
+
+	public function install_webhooks() {
+		$erp_url = sanitize_url( get_option( 'caz_woosync_erp_url', '' ) );
+		if ( empty( $erp_url ) ) {
+			return;
+		}
+
+		$delivery_url = trailingslashit( $erp_url ) . 'api/method/caz_woosync.controller.receiver.handle_webhook';
+		$secret       = wp_hash( 'caz_woosync_' . get_bloginfo( 'url' ) );
+
+		$topics = [
+			'order.created'   => 'CAZ WooSync — Order Created',
+			'order.updated'   => 'CAZ WooSync — Order Updated',
+			'product.created' => 'CAZ WooSync — Product Created',
+			'product.updated' => 'CAZ WooSync — Product Updated',
+			'customer.created'=> 'CAZ WooSync — Customer Created',
+			'customer.updated'=> 'CAZ WooSync — Customer Updated',
+		];
+
+		foreach ( $topics as $topic => $name ) {
+			// Skip if already exists
+			$existing = get_posts( [
+				'post_type'  => 'shop_webhook',
+				'meta_key'   => 'webhook_topic',
+				'meta_value' => $topic,
+				'meta_query' => [
+					[
+						'key'   => 'webhook_delivery_url',
+						'value' => $delivery_url,
+					],
+				],
+				'posts_per_page' => 1,
+			] );
+			if ( ! empty( $existing ) ) {
+				continue;
+			}
+
+			$webhook = new WC_Webhook();
+			$webhook->set_name( $name );
+			$webhook->set_topic( $topic );
+			$webhook->set_delivery_url( $delivery_url );
+			$webhook->set_secret( $secret );
+			$webhook->set_status( 'active' );
+			$webhook->set_api_version( 'wp_api_v3' );
+			$webhook->save();
+		}
 	}
 
 	public function get_settings() {
@@ -113,12 +165,16 @@ class CAZ_WooSync_Settings {
 			'caz-woosync-settings',
 			'cazWooSync',
 			[
-				'ajax_url' => admin_url( 'admin-ajax.php' ),
-				'nonce'    => wp_create_nonce( 'caz_woosync_test' ),
-				'i18n'     => [
-					'testing'   => __( 'Testing...', 'caz-woosync' ),
-					'connected' => __( 'Connected successfully.', 'caz-woosync' ),
-					'failed'    => __( 'Connection failed: ', 'caz-woosync' ),
+				'ajax_url'       => admin_url( 'admin-ajax.php' ),
+				'nonce'          => wp_create_nonce( 'caz_woosync_test' ),
+				'webhook_nonce'  => wp_create_nonce( 'caz_woosync_webhooks' ),
+				'i18n'           => [
+					'testing'          => __( 'Testing...', 'caz-woosync' ),
+					'connected'        => __( 'Connected successfully.', 'caz-woosync' ),
+					'failed'           => __( 'Connection failed: ', 'caz-woosync' ),
+					'installing'       => __( 'Installing webhooks...', 'caz-woosync' ),
+					'webhooks_done'    => __( 'Webhooks installed successfully.', 'caz-woosync' ),
+					'webhooks_failed'  => __( 'Webhook install failed: ', 'caz-woosync' ),
 				],
 			]
 		);
@@ -160,5 +216,14 @@ class CAZ_WooSync_Settings {
 		} else {
 			wp_send_json_error( [ 'message' => 'ERPNext returned HTTP ' . $code . '. Check your API Key and Secret.' ] );
 		}
+	}
+
+	public function ajax_install_webhooks() {
+		check_ajax_referer( 'caz_woosync_webhooks', 'nonce' );
+		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+			wp_send_json_error( [ 'message' => 'Insufficient permissions.' ] );
+		}
+		$this->install_webhooks();
+		wp_send_json_success( [ 'message' => '6 webhooks installed (or already exist).' ] );
 	}
 }

@@ -80,7 +80,10 @@ def install_webhooks(store_name: str) -> dict:
             "Webhook URL is not set. Save the store record first so ERPNext can generate the webhook URL."
         )
 
-    webhook_secret = store.get_password("webhook_secret") or ""
+    try:
+        webhook_secret = store.get_password("webhook_secret") or ""
+    except Exception:
+        webhook_secret = ""
 
     topics = [
         "order.created",
