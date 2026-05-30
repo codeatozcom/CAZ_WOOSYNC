@@ -674,10 +674,19 @@ def on_item_update(doc, method=None):
         )
         for store in stores:
             # Only queue if a mapping exists (don't push unmapped items)
-            if not frappe.db.exists(
+            mapping = frappe.db.get_value(
                 "Caz Woo Item Mapping",
                 {"store": store.name, "erp_item": doc.name},
-            ):
+                ["name", "woo_id", "last_synced"],
+                as_dict=True,
+            )
+            if not mapping:
+                continue
+
+            # Skip if the item was just synced FROM WooCommerce (last_synced within 60s)
+            # This prevents the import loop: woo→erp create → on_update → erp→woo push 0 stock
+            from frappe.utils import time_diff_in_seconds, now_datetime
+            if mapping.last_synced and time_diff_in_seconds(now_datetime(), mapping.last_synced) < 60:
                 continue
 
             # Dedup: skip if already queued or processing
