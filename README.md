@@ -1,26 +1,32 @@
 # CAZ WooSync
 
-Real-time WooCommerce sync for ERPNext v14, v15, and v16. Keeps your WooCommerce store and ERPNext instance in sync automatically — products, orders, customers, inventory, prices, accounting, refunds, coupons, and more.
+**WooCommerce ↔ ERPNext two-way sync connector.**
+
+Keeps your WooCommerce store and ERPNext instance in sync automatically — products, orders, customers, inventory, prices, accounting, refunds, coupons, and more. Supports multiple stores from a single ERPNext instance.
+
+---
 
 ## Features
 
-All 13 phases implemented:
+| Feature | Direction | Description |
+|---------|-----------|-------------|
+| Simple Products | Both ways | Creates/updates ERPNext Items from WooCommerce products and vice versa |
+| Variable Products | Woo → ERP | Syncs product variants as ERPNext Item Templates + Variants |
+| Orders | Woo → ERP | WooCommerce orders become ERPNext Sales Orders |
+| Customers | Woo → ERP | WooCommerce customers sync to ERPNext Customers, Contacts, Addresses |
+| Inventory | Both ways | Stock levels kept in sync between ERPNext Bin and WooCommerce stock_quantity |
+| Prices | Both ways | ERPNext Item Price ↔ WooCommerce regular/sale price |
+| Accounting | Woo → ERP | Sales Invoices and Payment Entries created from paid orders |
+| Refunds | Woo → ERP | WooCommerce refunds create ERPNext credit notes |
+| Coupons | Woo → ERP | WooCommerce coupons sync to ERPNext Pricing Rules |
+| Bulk Import | Woo → ERP | One-click import of all existing WooCommerce data into ERPNext |
+| Multi-store | — | Manage multiple WooCommerce stores from one ERPNext instance |
+| Webhooks | — | Real-time sync via HMAC-SHA256 verified webhooks |
+| Polling | — | 15-minute cron fallback for missed webhooks |
+| Queue Dashboard | — | Monitor sync status, retry failures, inspect errors |
+| Alerts | — | Email alerts for failures, daily digest, connection monitoring |
 
-| Phase | Feature |
-|-------|---------|
-| 1 | Core sync engine — bidirectional product sync with variant support |
-| 2 | Order sync — WooCommerce orders to ERPNext Sales Orders |
-| 3 | Customer sync — WooCommerce customers to ERPNext Customers |
-| 4 | Inventory sync — ERPNext stock levels pushed to WooCommerce |
-| 5 | Price sync — ERPNext price lists pushed to WooCommerce |
-| 6 | Accounting — payment gateway to journal entry mapping |
-| 7 | Refunds — WooCommerce refund to ERPNext credit note loop |
-| 8 | Coupons — WooCommerce coupon sync to ERPNext Pricing Rules |
-| 9 | Bulk import wizard — import all products, orders, customers from WooCommerce |
-| 10 | Multi-store dashboard — manage multiple WooCommerce stores from one ERPNext instance |
-| 11 | Sync queue page — monitor queue status, retry failures, inspect errors |
-| 12 | Webhooks + security — HMAC-SHA256 webhook verification, IP allowlist |
-| 13 | Alerts and notifications — email/in-app alerts for failures, daily digest, connection monitoring |
+---
 
 ## Requirements
 
@@ -29,117 +35,178 @@ All 13 phases implemented:
 - WordPress 6.0+
 - Python 3.10+
 
+---
+
 ## Installation
 
 ```bash
-# From the ERPNext bench directory
-bench get-app https://github.com/your-org/caz_woosync
+# From your ERPNext bench directory
+bench get-app https://github.com/codeatozcom/caz_woosync
 bench --site your-site.local install-app caz_woosync
 bench --site your-site.local migrate
 bench restart
 ```
 
+---
+
+## Quick Setup (5 minutes)
+
+### Step 1 — WooCommerce REST API Key
+
+1. Go to **WordPress Admin → WooCommerce → Settings → Advanced → REST API**
+2. Click **Add Key**
+3. Set Description: `CAZ WooSync`, User: `admin`, Permissions: `Read/Write`
+4. Click **Generate API Key**
+5. Copy the **Consumer Key** and **Consumer Secret**
+
+### Step 2 — ERPNext Store Record
+
+1. Go to **ERPNext → Caz Woosync → Caz Woo Store → New**
+2. Fill in:
+   - **WooCommerce URL** — your WordPress site URL (e.g. `https://myshop.com`)
+   - **Consumer Key** — `ck_...` from Step 1
+   - **Consumer Secret** — `cs_...` from Step 1
+   - **Company** — your ERPNext company
+3. Click **Save** — webhook secret is auto-generated
+4. Click **Test Connection** — should show "Connected"
+5. Click **Install Webhooks** — registers 6 webhooks in WooCommerce automatically
+
+### Step 3 — WordPress Plugin (optional but recommended)
+
+1. Upload the `woo-plugin/` folder to `wp-content/plugins/caz-woosync/`
+2. Activate **CAZ WooSync** in WordPress Admin → Plugins
+3. Go to **WooCommerce → Settings → CAZ WooSync**
+4. Enter your ERPNext URL, API Key, and API Secret
+5. Click **Save Changes** — webhooks are installed automatically
+6. Click **Test Connection to ERPNext**
+
+### Step 4 — Bulk Import Existing Data
+
+1. Go to **ERPNext → Caz Woosync → Caz Woo Import**
+2. Select your store
+3. Check Products, Orders, Customers
+4. Click **Start Import**
+
+---
+
 ## Configuration
 
-### 1. Add a Store
+### Global Settings
 
-1. Go to **CAZ Woo Store** and create a new record.
-2. Enter your WooCommerce store URL (e.g. `https://myshop.com`).
-3. Enter Consumer Key and Consumer Secret from **WooCommerce > Settings > Advanced > REST API**.
-4. Save. The Webhook URL field will auto-populate.
-5. Click **Test Connection** to verify credentials.
-
-### 2. Install Webhooks
-
-In the store record, click **Install Webhooks**. This creates 8 webhooks in WooCommerce (order created/updated/deleted, product created/updated/deleted, customer created/updated).
-
-Alternatively, add the webhook URL manually in **WooCommerce > Settings > Advanced > Webhooks** for each topic.
-
-### 3. Global Settings
-
-Go to **Caz Woo Settings** to configure:
-
-- **Rate Limiting**: max API requests per minute, queue batch size, retry attempts.
-- **Security**: enable webhook signature verification (recommended), restrict to specific IPs.
-- **Logging & Alerts**: enable debug logging, set alert email for failure notifications.
-- **Alert Settings**: configure daily digest, digest hour, connection failure alerts, and failure threshold.
-
-### 4. Alert Settings
+Go to **ERPNext → Caz Woosync → Caz Woo Settings**:
 
 | Setting | Default | Description |
 |---------|---------|-------------|
-| Alert Email | — | Email to receive alerts and digest. Leave blank to disable. |
-| Send Daily Digest | Off | Send a daily summary of sync activity. |
-| Digest Hour | 8 | Hour of day (0–23) to send the digest. |
-| Alert on Connection Failure | On | Email when a store connection test fails. |
-| Alert Threshold (Failures) | 3 | Alert after this many consecutive failures for the same item. |
+| Queue Batch Size | 50 | Items processed per queue run |
+| Max Retry Attempts | 5 | Retries before marking Failed |
+| Rate Limit (req/min) | 40 | WooCommerce API rate limit |
+| Verify Webhook Signature | On | Validate HMAC-SHA256 on incoming webhooks |
+| Alert Email | — | Email for failure alerts and daily digest |
+| Send Daily Digest | Off | Daily summary of sync activity |
+| Alert on Connection Failure | On | Email when a store goes offline |
 
-## Supported Sync Features
+### Store Settings
 
-| Feature | Direction | Notes |
-|---------|-----------|-------|
-| Simple products | Both | Creates/updates ERPNext Items |
-| Variable products | Woo → ERP | Variants mapped as item variants |
-| Orders | Woo → ERP | Maps to Sales Orders and Invoices |
-| Customers | Woo → ERP | Maps to ERPNext Customers |
-| Inventory | ERP → Woo | Buffer stock, hide vs zero, multi-warehouse |
-| Prices | ERP → Woo | Price list mapping per store |
-| Refunds | Woo → ERP | Credit notes via WooCommerce refund webhooks |
-| Coupons | Woo → ERP | Maps to ERPNext Pricing Rules |
-| Accounting | Woo → ERP | Journal entries for payment gateway settlements |
+Each **Caz Woo Store** record has per-store overrides:
 
-## WooCommerce Plugin Setup
+| Setting | Description |
+|---------|-------------|
+| Sync Direction | Both Ways / WooCommerce to ERPNext / ERPNext to WooCommerce |
+| Item Group | Default ERPNext item group for imported products |
+| Warehouse | Warehouse for stock sync |
+| Default UOM | Unit of measure for new items (default: Nos) |
+| Income Account | Account for sales revenue |
+| Create Items from Woo | Auto-create ERPNext items for new WooCommerce products |
+| Push Items Trigger | On Save / Scheduled / Manual |
 
-A companion WordPress plugin is included in the `woo-plugin/` directory. It is optional but recommended for:
-- Enhanced webhook payloads
-- Custom order meta sync
-- REST API endpoint extensions
+---
 
-Install it by uploading `woo-plugin/` to your WordPress `wp-content/plugins/` directory and activating it.
+## Sync Queue
 
-## Troubleshooting
+Go to **ERPNext → Caz Woosync → Caz Woo Queue** to monitor all sync activity:
 
-### Connection Test Fails
+- Filter by store, direction, entity type, status
+- Retry failed items individually or in bulk
+- View full error log for each failure
+- Auto-refreshes every 30 seconds
 
-- Verify Store URL does not have a trailing slash issue.
-- Check Consumer Key/Secret are for the correct environment.
-- Ensure WooCommerce REST API is enabled (**WooCommerce > Settings > Advanced > REST API**).
-- Check that the site is publicly accessible (not behind a VPN or local-only).
+### Queue Statuses
 
-### Sync Queue Stuck
+| Status | Meaning |
+|--------|---------|
+| Queued | Waiting to be processed |
+| Processing | Currently running |
+| Done | Completed successfully |
+| Failed | All retries exhausted |
+| Skipped | Manually skipped |
 
-- Go to the **CAZ WooSync Queue** page to see item statuses.
-- Failed items show the full error log.
-- Use **Retry** on individual items or clear the queue and re-import.
-- Check **Error Log** in ERPNext for `CAZ WooSync` entries.
-
-### Webhooks Not Arriving
-
-- Confirm webhooks are installed (store record > Webhooks tab).
-- Check that the Webhook URL is publicly accessible.
-- Enable **Verify Webhook Signature** only after confirming the webhook secret matches.
-- Use `bench --site your-site.local console` to test manually.
-
-### Daily Digest Not Sending
-
-- Confirm **Alert Email** is set in **Caz Woo Settings**.
-- Confirm **Send Daily Digest** is enabled.
-- The digest runs via the daily scheduler — ensure `bench schedule` is running.
-- Check **Error Log** for `CAZ WooSync digest failed` entries.
+---
 
 ## Scheduler Jobs
 
 | Schedule | Job |
 |----------|-----|
 | Every 5 minutes | Process sync queue |
-| Every 15 minutes | Poll WooCommerce for changes (cron fallback) |
-| Daily | Health check, connection test, daily digest |
+| Every 15 minutes | Poll WooCommerce for new/updated records |
+| Daily | Health check, connection test, daily digest email |
+
+---
+
+## ERPNext API Keys (for WordPress plugin)
+
+1. Go to **ERPNext → Settings → Users → Administrator**
+2. Scroll to **API Access**
+3. Click **Generate Keys**
+4. Copy the **API Key** and **API Secret**
+
+Or via URL: `http://your-erp/api/method/frappe.core.doctype.user.user.generate_keys?user=Administrator`
+
+---
+
+## Troubleshooting
+
+### Connection Test Fails
+- Check Consumer Key/Secret are correct
+- Ensure WooCommerce REST API is enabled
+- For local setups: use your machine's IP instead of `localhost`
+
+### Orders Not Syncing
+- Ensure Customers are imported first (Bulk Import → Customers)
+- Check **Warehouse** is set on the Caz Woo Store record
+- Check **ERPNext → Settings → Error Log** for `CAZ WooSync` entries
+
+### Webhooks Not Arriving
+- Click **Install Webhooks** on the store record
+- Ensure ERPNext URL is publicly accessible (not behind a firewall)
+- For local testing: use ngrok (`ngrok http 8080`) to expose ERPNext
+
+### Queue Stuck on Queued
+- Run: `bench --site your-site execute caz_woosync.tasks.process_sync_queue`
+- Check background workers are running: `bench doctor`
+
+### Products Showing as Out of Stock after Import
+- This is fixed in v1.0.0 — the 60-second guard prevents import loops
+- Manually restore stock in WooCommerce if affected by an older version
+
+---
 
 ## Testing
 
 ```bash
 pip install pytest
 python -m pytest tests/ -v
+# 613 tests, all passing
 ```
 
-581+ tests covering all sync phases.
+---
+
+## License
+
+MIT License — see [LICENSE](LICENSE) file.
+
+---
+
+## Support
+
+- GitHub Issues: [codeatozcom/caz_woosync/issues](https://github.com/codeatozcom/caz_woosync/issues)
+- Email: support@codeatoz.com

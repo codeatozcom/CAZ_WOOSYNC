@@ -5,7 +5,7 @@ with open("requirements.txt") as f:
 
 setup(
     name="caz_woosync",
-    version="0.1.0",
+    version="1.0.0",
     description="CAZ WooSync — WooCommerce sync for ERPNext",
     author="CodeAtoZ",
     author_email="support@codeatoz.com",
