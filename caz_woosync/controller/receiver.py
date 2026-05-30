@@ -42,7 +42,7 @@ def handle_webhook(**kwargs):
     if settings.verify_webhook_signature:
         signature = request.headers.get("X-WC-Webhook-Signature", "")
         store_doc = frappe.get_doc("Caz Woo Store", store_name)
-        webhook_secret = store_doc.get_password("webhook_secret") or ""
+        webhook_secret = store_doc.webhook_secret or ""
         if not verify_webhook_signature(raw_body, signature, webhook_secret):
             frappe.log_error(
                 f"Invalid HMAC signature from {client_ip} for store {store_name}. "

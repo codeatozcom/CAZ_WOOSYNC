@@ -45,13 +45,8 @@ class CazWooStore(Document):
     def _ensure_webhook_secret(self):
         """Auto-generate webhook_secret if not already set."""
         import secrets
-        try:
-            existing = self.get_password("webhook_secret")
-            if existing:
-                return
-        except Exception:
-            pass
-        self.webhook_secret = secrets.token_hex(32)
+        if not self.webhook_secret:
+            self.webhook_secret = secrets.token_hex(32)
 
     @frappe.whitelist()
     def test_connection(self):
