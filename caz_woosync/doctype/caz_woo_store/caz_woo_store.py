@@ -40,6 +40,18 @@ class CazWooStore(Document):
             f"{site_url}/api/method/caz_woosync.controller.receiver.handle_webhook"
             f"?store={url_quote(self.name or '')}"
         )
+        self._ensure_webhook_secret()
+
+    def _ensure_webhook_secret(self):
+        """Auto-generate webhook_secret if not already set."""
+        import secrets
+        try:
+            existing = self.get_password("webhook_secret")
+            if existing:
+                return
+        except Exception:
+            pass
+        self.webhook_secret = secrets.token_hex(32)
 
     @frappe.whitelist()
     def test_connection(self):
