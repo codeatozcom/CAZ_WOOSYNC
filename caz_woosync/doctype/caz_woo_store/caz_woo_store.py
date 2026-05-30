@@ -14,10 +14,10 @@ class CazWooStore(Document):
         self._validate_no_duplicate_url()
 
     def _validate_url(self):
-        """Ensure woo_url starts with https:// for security."""
-        if self.woo_url and not self.woo_url.startswith("https://"):
+        """Ensure woo_url starts with http:// or https://."""
+        if self.woo_url and not (self.woo_url.startswith("https://") or self.woo_url.startswith("http://")):
             frappe.throw(
-                "WooCommerce URL must start with https://. HTTP is not supported for security reasons."
+                "WooCommerce URL must start with http:// or https://."
             )
 
     def _validate_no_duplicate_url(self):
