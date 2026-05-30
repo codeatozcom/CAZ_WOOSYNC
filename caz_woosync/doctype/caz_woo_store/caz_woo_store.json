@@ -134,9 +134,9 @@
     },
     {
       "fieldname": "webhook_secret",
-      "fieldtype": "Password",
+      "fieldtype": "Data",
       "label": "Webhook Secret",
-      "description": "Secret used to verify incoming WooCommerce webhook signatures (HMAC-SHA256). Generate a strong random string and paste it here and in your WooCommerce webhook settings."
+      "description": "Secret used to verify incoming WooCommerce webhook signatures (HMAC-SHA256). Auto-generated on save. Copy this into your WooCommerce webhook settings."
     },
     {
       "fieldname": "woo_api_version",

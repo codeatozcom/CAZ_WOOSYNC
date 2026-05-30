@@ -23,4 +23,26 @@ jQuery(document).ready(function ($) {
 			$btn.prop('disabled', false).text('Test Connection to ERPNext');
 		});
 	});
+
+	// Install Webhooks button
+	$('#caz-install-webhooks').on('click', function () {
+		var $wbtn = $(this);
+		var $wresult = $('#caz-webhook-result');
+		$wbtn.prop('disabled', true).text(cazWooSync.i18n.installing);
+		$wresult.text('').css('color', '');
+		$.post(cazWooSync.ajax_url, {
+			action: 'caz_woosync_install_webhooks',
+			nonce: cazWooSync.webhook_nonce,
+		}, function (res) {
+			if (res.success) {
+				$wresult.text('✅ ' + res.data.message).css('color', 'green');
+			} else {
+				$wresult.text('❌ ' + cazWooSync.i18n.webhooks_failed + res.data.message).css('color', 'red');
+			}
+		}).fail(function () {
+			$wresult.text('❌ Request failed.').css('color', 'red');
+		}).always(function () {
+			$wbtn.prop('disabled', false).text('Install Webhooks');
+		});
+	});
 });
