@@ -288,7 +288,8 @@ class TestStoreUrlValidation(unittest.TestCase):
         return store
 
     def test_http_url_raises(self):
-        store = self._make_store("http://example.com")
+        # HTTP is now allowed (for local dev); only invalid schemes raise
+        store = self._make_store("ftp://example.com")
         with self.assertRaises(Exception):
             store._validate_url()
         _frappe().throw.assert_called_once()
