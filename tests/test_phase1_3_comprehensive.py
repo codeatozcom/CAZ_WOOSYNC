@@ -21,7 +21,7 @@ import pytest
 
 ROOT = Path(__file__).parent.parent
 DOCTYPE_DIR = ROOT / "caz_woosync" / "doctype"
-WOO_PLUGIN = ROOT / "woo-plugin"
+WOO_PLUGIN = ROOT / "wordpress" / "woo-plugin"
 
 # ──────────────────────────────────────────────────────────────────────────────
 # Constants mirrored from source (tested independently)
@@ -568,8 +568,8 @@ class TestHooksRegistration:
 
     def test_required_apps(self):
         src = self._src()
-        assert '"frappe"' in src
-        assert '"erpnext"' in src
+        assert "frappe" in src
+        assert "erpnext" in src
 
 
 # ──────────────────────────────────────────────────────────────────────────────

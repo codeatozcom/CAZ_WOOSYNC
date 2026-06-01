@@ -8,7 +8,7 @@ app_version = "1.0.0"
 app_icon = "octicon octicon-sync"
 app_color = "blue"
 
-required_apps = ["frappe", "erpnext"]
+required_apps = ["frappe/frappe>=15.0.0", "frappe/erpnext>=15.0.0"]
 
 after_install = "caz_woosync.install.after_install"
 after_uninstall = "caz_woosync.install.after_uninstall"
