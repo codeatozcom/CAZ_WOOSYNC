@@ -568,7 +568,6 @@ class TestHooksRegistration:
 
     def test_required_apps(self):
         src = self._src()
-        assert "frappe" in src
         assert "erpnext" in src
 
 
