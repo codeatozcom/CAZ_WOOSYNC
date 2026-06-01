@@ -4,7 +4,7 @@ app_publisher = "CodeAtoZ"
 app_description = "Real-time WooCommerce sync for ERPNext v14, v15 and v16"
 app_email = "support@codeatoz.com"
 app_license = "MIT"
-app_version = "0.1.0"
+app_version = "1.0.0"
 app_icon = "octicon octicon-sync"
 app_color = "blue"
 
