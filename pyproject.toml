@@ -10,8 +10,9 @@ dependencies = [
     "woocommerce>=3.0.0,<4.0.0",
 ]
 
-[tool.frappe]
-required_apps = [{ name = "erpnext", version = ">=15.0.0" }]
+[tool.bench.frappe-dependencies]
+frappe = ">=15.0.0,<17.0.0"
+erpnext = ">=15.0.0,<17.0.0"
 
 [project.urls]
 Homepage = "https://github.com/codeatozcom/CAZ_WOOSYNC"
