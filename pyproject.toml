@@ -1,0 +1,19 @@
+[project]
+name = "caz_woosync"
+version = "1.0.0"
+description = "CAZ WooSync — WooCommerce ↔ ERPNext two-way sync connector"
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.10"
+dependencies = [
+    "requests>=2.28.0",
+    "woocommerce>=3.0.0,<4.0.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/codeatozcom/CAZ_WOOSYNC"
+Repository = "https://github.com/codeatozcom/CAZ_WOOSYNC"
+
+[build-system]
+requires = ["flit_core >=3.2.0,<4"]
+build-backend = "flit_core.buildapi"
